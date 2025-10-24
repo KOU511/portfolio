@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study - Reporting Process Automation</title>
+
+    <!-- SEO & OGP -->
+    <meta name="description" content="DX in the monthly reporting process through RPA and Python integration. A case study on an improvement project that eliminated manual work and accelerated data-driven decision-making.">
+    <meta property="og:title" content="Case Study - Reporting Process Automation">
+    <meta property="og:description" content="A project that automated the monthly reporting process by integrating RPA and Python, achieving significant man-hour reduction and enabling real-time decision-making."> <!-- Updated: 95% -> significant -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://kou511.github.io/my-portfolio/project-automation_en.html"> <!-- Updated URL -->
+    <meta property="og:image" content="https://kou511.github.io/my-portfolio/images/ogp-automation.webp"> <!-- Updated URL -->
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.webp">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Flicker-Fix Script (Default to Dark Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark
+        }
+    </script>
+
+    <!-- Fonts, CSS, Icons -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"> <!-- Removed Japanese font -->
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            /* Light Mode Theme */
+            --primary-color: #03887B;      /* Deep Mint Green */
+            --secondary-color: #6F2DA8;   /* Deep Purple */
+            --bg-main: #FAFAFA;           /* Bright off-white */
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border-color: #e5e5e5;      /* Neutral-200 */
+            --text-main: #212121;         /* Deep black */
+            --text-sub: #737373;          /* Neutral-500 */
+            --shadow-color: rgba(0,0,0,0.07);
+            --dynamic-grad-opacity: 0.05;
+            --btn-text-color: #FAFAFA;
+            --accent-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        html.dark {
+            /* Dark Mode Theme */
+            --primary-color: #00CBAA;      /* Emerald Green */
+            --secondary-color: #9D4EDD;   /* Vibrant Violet */
+            --bg-main: #171717;           /* Near-black gray */
+            --bg-card: rgba(39, 39, 39, 0.6); /* Translucent #272727 */
+            --border-color: rgba(0, 203, 170, 0.2); /* Translucent primary */
+            --text-main: #F3F3F3;         /* Pure white */
+            --text-sub: #a1a1aa;          /* Mid-gray */
+            --shadow-color: rgba(0,0,0,0.5);
+            --dynamic-grad-opacity: 0.07;
+            --btn-text-color: #171717;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', sans-serif; /* Use Poppins as primary */
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.4s, color 0.4s;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, var(--primary-color), transparent 40%),
+                        radial-gradient(circle at 85% 30%, var(--secondary-color), transparent 40%),
+                        radial-gradient(circle at 50% 90%, #3a2d80, transparent 50%);
+            background-color: var(--bg-main); opacity: var(--dynamic-grad-opacity); z-index: -1;
+            animation: gradient-flow 20s ease-in-out infinite;
+            transition: opacity 0.4s;
+        }
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+            50% { background-position: 100% 50%, 100% 50%, 100% 50%; }
+        }
+        .glass-card {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); background-repeat: repeat; opacity: 0.025; }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: rgba(0, 203, 170, 0.5);
+        }
+        #loader {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-main); color: var(--primary-color);
+            font-size: 2rem; font-weight: bold;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        
+        .controls-container {
+            position: fixed; 
+            top: 1.5rem; right: 1.5rem; 
+            z-index: 51;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #theme-toggle {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; 
+        }
+        #theme-toggle i { color: var(--text-sub); transition: color 0.3s, transform 0.3s; }
+        #theme-toggle:hover i { color: var(--primary-color); transform: rotate(15deg); }
+        
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+        #hero-bg {
+            background-image: url('images/Reporting_Automation.webp');
+            background-size: cover; background-position: center; position: relative;
+        }
+        #hero-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(23, 23, 23, 0.9) 0%, rgba(23, 23, 23, 0.7) 100%);
+            z-index: 1;
+        }
+        html:not(.dark) #hero-bg::before {
+             background: linear-gradient(180deg, rgba(250, 250, 250, 0.9) 0%, rgba(250, 250, 250, 0.7) 100%);
+        }
+        #hero-bg > * { position: relative; z-index: 2; }
+        .timeline-card { 
+            position: relative; padding-left: 4rem; padding-bottom: 2.5rem;
+        }
+        .timeline-card:last-child { padding-bottom: 0; }
+        .timeline-card::before {
+            content: ''; position: absolute; left: 28px; top: 0.5rem;
+            width: 2px; height: 100%; background: var(--border-color); 
+        }
+        .timeline-card:last-child::before { display: none; }
+        .timeline-icon {
+            position: absolute; left: 0; top: 0; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--btn-text-color); background: var(--primary-color);
+            border: 2px solid var(--border-color); z-index: 1; transition: all 0.3s;
+        }
+        .section-nav {
+            position: fixed; top: 50%; left: 2rem; transform: translateY(-50%);
+            z-index: 50; display: none;
+        }
+        @media (min-width: 1280px) { .section-nav { display: block; } }
+        .section-nav ul { list-style: none; padding: 0; margin: 0; }
+        .section-nav a {
+            display: flex; align-items: center;
+            padding: 0.5rem 0; color: var(--text-sub);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            position: relative; transition: color 0.3s;
+        }
+        .section-nav a::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background-color: var(--text-sub); border-radius: 50%;
+            margin-right: 1rem; transition: all 0.3s;
+        }
+        .section-nav a.active, .section-nav a:hover { color: var(--primary-color); }
+        .section-nav a.active::before, .section-nav a:hover::before {
+            background-color: var(--primary-color);
+            transform: scale(1.5);
+        }
+        .reveal { opacity: 0; transform: translateY(50px); }
+        .timeline-icon-wrapper {
+            position: relative; z-index: 1;
+        }
+        .timeline-icon-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border-width: 2px; margin: 0 auto;
+            background-color: var(--bg-main);
+            transition: all 0.4s ease-in-out;
+        }
+        .reveal-child:hover .timeline-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .flow-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            height: 100%;
+        }
+        .flow-icon {
+            font-size: 1.5rem; width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .flow-arrow {
+            color: var(--text-sub); font-size: 1.5rem; margin: 0.5rem 0; text-align: center;
+        }
+        .btn-custom-text {
+            color: var(--btn-text-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">Loading...</div>
+    <div class="controls-container">
+        <a href="project-automation.html" class="text-[var(--text-sub)] hover:text-[var(--primary-color)] transition-colors font-bold text-lg" aria-label="Switch to Japanese">JP</a>
+        <button id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+    </div>
+
+    <header class="fixed top-0 left-0 z-50 p-6">
+        <a href="index_en.html" class="glass-card inline-block px-4 py-2 text-sm hover:!border-[var(--primary-color)] transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Portfolio
+        </a>
+    </header>
+
+    <nav class="section-nav">
+        <ul>
+            <li><a href="#overview" class="active">Overview</a></li>
+            <li><a href="#timeline">Journey</a></li>
+            <li><a href="#challenge">Challenge</a></li>
+            <li><a href="#solution">Transformation</a></li>
+            <li><a href="#action">Process</a></li>
+            <li><a href="#result">Result</a></li>
+            <li><a href="#takeaways">Takeaways</a></li>
+        </ul>
+    </nav>
+
+    <div class="flex">
+        <main class="w-full max-w-screen-lg mx-auto p-4 md:p-12 space-y-24">
+
+            <section id="hero-bg" class="rounded-2xl py-24 md:py-40 mt-16">
+                <div id="hero" class="text-center px-4">
+                    <p class="text-lg text-[var(--secondary-color)] font-semibold tracking-widest reveal">PROJECT CASE STUDY</p>
+                    <h1 class="text-4xl md:text-6xl mt-2 mb-6 gradient-text reveal">Reporting Process Automation</h1>
+                    <p class="text-xl leading-relaxed font-normal max-w-3xl mx-auto text-[var(--text-main)] reveal">
+                        A DX project that transformed the monthly reporting process through RPA and Python integration, eliminating manual tasks and accelerating data-driven decision-making.
+                    </p>
+                </div>
+            </section>
+
+            <section id="overview" data-gsap-stagger>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-user-tie text-4xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Our Role</h3>
+                        <p class="text-[var(--text-sub)]">Project Member / Automation Lead</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-tools text-4xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Key Technologies</h3>
+                        <p class="text-[var(--text-sub)]">RPA, Python</p> <!-- Updated: Removed specifics -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-stopwatch text-4xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Result</h3>
+                        <p class="text-[var(--text-sub)]">Significant Man-Hour Reduction</p> <!-- Updated: Removed percentage -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="timeline">
+                <div class="section-title text-center mb-16">
+                    <h2 class="reveal gradient-text">Project Journey</h2>
+                </div>
+                <div class="relative max-w-4xl mx-auto px-4" data-gsap-stagger>
+                    <div class="absolute top-8 left-0 w-full h-0.5 bg-[var(--border-color)]"></div>
+                    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--secondary-color)]">
+                                    <i class="fas fa-hand-paper text-2xl text-[var(--secondary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Challenge</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Inefficient manual work and<br>risk of human error</p>
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--primary-color)]">
+                                    <i class="fas fa-robot text-2xl text-[var(--primary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Action</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Hybrid automation via<br>RPA and Python integration</p>
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-yellow-400">
+                                    <i class="fas fa-chart-line text-2xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Result</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Significant reduction and<br>real-time decision-making</p> <!-- Updated: Removed percentage -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="challenge">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Background & Challenges</h2></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="glass-card p-8 md:p-10 reveal-child">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-history text-2xl text-[var(--secondary-color)] mr-4"></i>Situation: The Existing Reporting Process</h3> <!-- Revised: Inefficiency as the Norm -> The Existing Reporting Process -->
+                        <p class="text-[var(--text-sub)] leading-relaxed font-normal">
+                           Monthly reports were compiled manually by staff extracting data from the core system and manufacturing execution system, then aggregating it in spreadsheets. This process required significant time each month, creating a heavy workload. Additionally, there were concerns about data reliability due to potential manual errors like typos. <!-- Revised: several days -> significant time, human errors compromised -> concerns about data reliability due to potential manual errors, SAP/MES -> core system/manufacturing execution system, Excel -> spreadsheets -->
+                        </p>
+                    </div>
+                    <div class="glass-card p-8 md:p-10 reveal-child">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-code-branch text-2xl text-yellow-400 mr-4"></i>Difficulty: Tool Selection and Implementation</h3> <!-- Revised: Tool Limitations -> Tool Selection and Implementation -->
+                        <p class="text-[var(--text-sub)] leading-relaxed font-normal">
+                           We initially considered automating with RPA alone, but found that the logic required to link different data formats and calculate new metrics would be complex to implement using standard functions alone. Combining appropriate tools and overcoming technical challenges was key to the project's success. <!-- Revised: difficult -> complex, barrier -> challenges -->
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="solution" data-gsap-stagger>
+                <div class="section-title text-center mb-16"><h2 class="reveal-child gradient-text">Transformation: Manual to Automated</h2></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="flow-card border-red-500/30 reveal-child">
+                        <h3 class="text-2xl text-red-400 mb-6 text-center">BEFORE: Manual Reporting</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-red-400"><i class="fas fa-database"></i></div>
+                                <div><h4>Manual Data Extraction</h4><p class="text-sm text-[var(--text-sub)]">Staff downloads CSVs from multiple systems</p></div> <!-- Revised: SAP/MES -> multiple systems -->
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                             <div class="flex items-center gap-4">
+                                <div class="flow-icon text-red-400"><i class="fas fa-file-excel"></i></div>
+                                <div><h4>Manual Work in Spreadsheets</h4><p class="text-sm text-[var(--text-sub)]">Merge multiple files and process with formulas</p></div> <!-- Revised: Excel -> Spreadsheets -->
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-red-400"><i class="fas fa-brain"></i></div>
+                                <div><h4>Risk of Human Error</h4><p class="text-sm text-[var(--text-sub)]">Potential for typos and miscalculations affecting reliability</p></div> <!-- Revised: Frequent...low reliability -> Potential...affecting reliability -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flow-card border-green-500/30 reveal-child">
+                        <h3 class="text-2xl text-green-400 mb-6 text-center">AFTER: Hybrid Automation</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-green-400"><i class="fas fa-robot"></i></div>
+                                <div><h4>Automated Data Collection</h4><p class="text-sm text-[var(--text-sub)]">RPA bot automatically retrieves CSVs from each system</p></div>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                             <div class="flex items-center gap-4">
+                                <div class="flow-icon text-green-400"><i class="fab fa-python"></i></div>
+                                <div><h4>Automated Processing via Python</h4><p class="text-sm text-[var(--text-sub)]">Script handles data merging, calculation, and formatting</p></div> <!-- Revised: API -> Script -->
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-green-400"><i class="fas fa-chart-pie"></i></div>
+                                <div><h4>Automatic Sync to BI Dashboard</h4><p class="text-sm text-[var(--text-sub)]">Latest data is always visualized and shared in real-time</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="action">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Problem-Solving Process</h2></div>
+                <div class="max-w-3xl mx-auto" data-gsap-stagger>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-search"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Step 1: Thorough Process Visualization</h3><p class="text-[var(--text-sub)] font-normal">Through repeated interviews with staff, we mapped out the entire existing workflow. We created a flowchart detailing "what" was being reported, "from where," "how it was processed," and "to whom," identifying key points and challenges for automation.</p></div> <!-- Revised: bottlenecks -> key points and challenges -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                         <div class="timeline-icon"><i class="fas fa-robot"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Step 2: RPA Scenario Design</h3><p class="text-[var(--text-sub)] font-normal">We designed and developed an RPA scenario with a clear role: to focus on the routine and reliable task of logging into each system and downloading the necessary CSV files.</p></div> <!-- Revised: simple -> routine -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                         <div class="timeline-icon"><i class="fab fa-python"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Step 3: Development of Data Processing Logic with Python</h3><p class="text-[var(--text-sub)] font-normal">To complement RPA's capabilities, we developed data processing logic using Python. This created a hybrid system where the script receives multiple CSVs from the RPA, then performs the merging, calculation, and formatting.</p></div> <!-- Revised: web API -> data processing logic, API receives -> script receives -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Step 4: Phased Rollout & Changed Information Sharing</h3><p class="text-[var(--text-sub)] font-normal">The generated data was automatically linked to a BI dashboard on a shared folder. This allowed stakeholders to check the latest status in real-time, shifting the culture from "waiting" for reports to proactively "viewing" information when needed.</p></div> <!-- Revised: Sharing Transformation -> Changed Information Sharing, SharePoint -> shared folder -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="result">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Value Delivered</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-stopwatch-20 text-5xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">Significant Man-Hour Reduction</h3>
+                        <p class="text-4xl font-bold gradient-text my-4">Achieved</p> <!-- Updated: Qualitative description -->
+                        <p class="text-[var(--text-sub)]">Automating the time-consuming monthly reporting work allowed staff to shift to more value-added analytical tasks. (Details confidential)</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-bullseye text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">Reduced Risk of Human Error</h3> <!-- Revised: Elimination -> Reduced Risk -->
+                        <p class="text-[var(--text-sub)] mt-4">By reducing manual work, the risk of typos and calculation mistakes was lowered, improving data reliability.</p> <!-- Revised: completely removing -> reducing, eliminated -> lowered, dramatically improving -> improving -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                         <i class="fas fa-sync-alt text-5xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Support for Real-Time Decision Making</h3> <!-- Revised: Real-Time Decision Making -> Support for Real-Time Decision Making -->
+                        <p class="text-[var(--text-sub)] mt-4">Stakeholders no longer had to wait for monthly reports, enabling them to make timely, informed decisions based on the latest available data.</p> <!-- Revised: quick -> timely -->
+                    </div>
+                     <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-lightbulb text-5xl text-[var(--secondary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Replicable Model</h3>
+                        <p class="text-[var(--text-sub)] mt-4">This hybrid automation method is applicable to similar tasks in other departments, serving as a reference case for organizational DX initiatives.</p> <!-- Revised: company-wide best practice -> reference case for organizational -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="takeaways">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Takeaways & Replicability</h2></div>
+                <div class="grid grid-cols-1 gap-8">
+                    <div class="glass-card p-8 md:p-12 reveal">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-puzzle-piece text-2xl text-[var(--secondary-color)] mr-4"></i>Leveraging "Combination" Based on Tool Characteristics</h3> <!-- Revised: Overcoming Limitations -> Leveraging...Characteristics -->
+                        <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                            We initially aimed for automation with RPA alone but faced challenges with complex data processing. This experience taught us the importance of a hybrid approach that leverages the strengths of different tools instead of sticking to just one. Combining RPA's "reliability in routine tasks" with Python's "flexible data processing capabilities" allowed us to achieve a higher level of automation than possible with a single tool. This insight has become valuable knowledge for advancing future DX projects. <!-- Revised: hit a wall -> faced challenges, guiding principle -> valuable knowledge -->
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-tools text-[var(--primary-color)] mr-3"></i>Skills Used</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-center"><i class="fas fa-robot mr-3 text-blue-400"></i>RPA</li> <!-- Updated: Removed specific tool -->
+                                <li class="flex items-center"><i class="fab fa-python mr-3 text-yellow-400"></i>Python (Data Processing)</li> <!-- Updated: Removed specific libraries -->
+                                <li class="flex items-center"><i class="fas fa-tasks mr-3 text-green-400"></i>Business Process Analysis</li>
+                                <li class="flex items-center"><i class="fas fa-server mr-3 text-indigo-400"></i>Knowledge of API Integration</li> <!-- Revised: API Development -> Knowledge of API Integration -->
+                            </ul>
+                        </div>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>Replication Points</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Hybrid Approach:</strong> Combine the strengths of multiple tools, like RPA and a programming language, to compensate for limitations.</p> <!-- Revised: weaknesses -> limitations --></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Clear Role Division:</strong> Assign routine tasks like data collection to RPA and complex data processing to Python.</p> <!-- Revised: simple -> routine --></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Process Decoupling:</strong> Separating the data processing logic improves maintainability, scalability, and makes it easier to consider reuse by other systems.</p></li> <!-- Revised: API abstraction -> Process Decoupling, Abstracting processes as APIs -> Separating the data processing logic, reusability -> easier to consider reuse -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center reveal">
+                 <a href="index_en.html" class="inline-block bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[var(--primary-color)]/20 btn-custom-text">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Portfolio
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docHtml = document.documentElement;
+            
+            window.onload = () => { document.getElementById('loader').classList.add('hidden'); };
+
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleIcon = themeToggle.querySelector('i');
+            
+            function applyTheme() {
+                const isDark = docHtml.classList.contains('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                toggleIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+
+            // Default to dark mode unless light is explicitly set
+            if (localStorage.getItem('theme') === 'light') {
+                docHtml.classList.remove('dark');
+            } else {
+                docHtml.classList.add('dark');
+            }
+            applyTheme();
+            
+            themeToggle.addEventListener('click', () => {
+                docHtml.classList.toggle('dark');
+                applyTheme();
+            });
+            
+            // GSAP Animations
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('[data-gsap-stagger]').forEach(container => {
+                const targets = container.querySelectorAll('.reveal-child');
+                gsap.fromTo(targets, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: container, start: 'top 85%', toggleActions: 'play none none none' }
+                });
+            });
+            gsap.utils.toArray('.reveal').forEach(elem => {
+                gsap.fromTo(elem, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+                    scrollTrigger: { trigger: elem, start: 'top 90%', toggleActions: 'play none none none' }
+                });
+            });
+            // Removed counter animation trigger
+            
+            // Section Navigation Active State
+            const sections = gsap.utils.toArray('main section');
+            const navLinks = gsap.utils.toArray('.section-nav a');
+            sections.forEach(section => {
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: 'top center',
+                    end: 'bottom center',
+                    onToggle: self => {
+                        const navLink = document.querySelector(`.section-nav a[href="#${section.id}"]`);
+                        if (navLink) {
+                            if (self.isActive) {
+                                navLinks.forEach(link => link.classList.remove('active'));
+                                navLink.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study - Streamlining Operations via Automation</title> <!-- Updated Title -->
+
+    <!-- SEO & OGP -->
+    <meta name="description" content="Drastically improving efficiency for time-consuming manual tasks. A chronicle of improvements automating operations from order to shipment using scripts and APIs."> <!-- Updated Desc -->
+    <meta property="og:title" content="Case Study - Streamlining Operations via Automation"> <!-- Updated Title -->
+    <meta property="og:description" content="A project case study on automating business workflows with script and API integration, significantly reducing work time and boosting organizational productivity."> <!-- Updated Desc -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://kou511.github.io/my-portfolio/project-generative-ai_en.html"> <!-- Updated URL -->
+    <meta property="og:image" content="https://kou511.github.io/my-portfolio/images/ogp-generative-ai.webp"> <!-- Updated URL -->
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.webp">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Flicker-Fix Script (Default to Dark Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark
+        }
+    </script>
+
+    <!-- Fonts, CSS, Icons -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"> <!-- Removed Japanese font -->
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            /* Light Mode Theme */
+            --primary-color: #03887B;      /* Deep Mint Green */
+            --secondary-color: #6F2DA8;   /* Deep Purple */
+            --bg-main: #FAFAFA;           /* Bright off-white */
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border-color: #e5e5e5;      /* Neutral-200 */
+            --text-main: #212121;         /* Deep black */
+            --text-sub: #737373;          /* Neutral-500 */
+            --shadow-color: rgba(0,0,0,0.07);
+            --dynamic-grad-opacity: 0.05;
+            --btn-text-color: #FAFAFA;
+            --accent-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        html.dark {
+            /* Dark Mode Theme */
+            --primary-color: #00CBAA;      /* Emerald Green */
+            --secondary-color: #9D4EDD;   /* Vibrant Violet */
+            --bg-main: #171717;           /* Near-black gray */
+            --bg-card: rgba(39, 39, 39, 0.6); /* Translucent #272727 */
+            --border-color: rgba(0, 203, 170, 0.2); /* Translucent primary */
+            --text-main: #F3F3F3;         /* Pure white */
+            --text-sub: #a1a1aa;          /* Mid-gray */
+            --shadow-color: rgba(0,0,0,0.5);
+            --dynamic-grad-opacity: 0.07;
+            --btn-text-color: #171717;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', sans-serif; /* Use Poppins as primary */
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.4s, color 0.4s;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, var(--primary-color), transparent 40%),
+                        radial-gradient(circle at 85% 30%, var(--secondary-color), transparent 40%),
+                        radial-gradient(circle at 50% 90%, #3a2d80, transparent 50%);
+            background-color: var(--bg-main); opacity: var(--dynamic-grad-opacity); z-index: -1;
+            animation: gradient-flow 20s ease-in-out infinite;
+            transition: opacity 0.4s;
+        }
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+            50% { background-position: 100% 50%, 100% 50%, 100% 50%; }
+        }
+        .glass-card {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); background-repeat: repeat; opacity: 0.025; }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: rgba(0, 203, 170, 0.5);
+        }
+        #loader {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-main); color: var(--primary-color);
+            font-size: 2rem; font-weight: bold;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        
+        .controls-container {
+            position: fixed; 
+            top: 1.5rem; right: 1.5rem; 
+            z-index: 51;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #theme-toggle {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        #theme-toggle i { color: var(--text-sub); transition: color 0.3s, transform 0.3s; }
+        #theme-toggle:hover i { color: var(--primary-color); transform: rotate(15deg); }
+
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+        #hero-bg {
+            background-image: url('images/workflow.webp');
+            background-size: cover; background-position: center; position: relative;
+        }
+        #hero-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(23, 23, 23, 0.9) 0%, rgba(23, 23, 23, 0.7) 100%);
+            z-index: 1;
+        }
+        html:not(.dark) #hero-bg::before {
+             background: linear-gradient(180deg, rgba(250, 250, 250, 0.9) 0%, rgba(250, 250, 250, 0.7) 100%);
+        }
+        #hero-bg > * { position: relative; z-index: 2; }
+
+        .timeline-card { 
+            position: relative; padding-left: 4rem; padding-bottom: 2.5rem;
+        }
+        .timeline-card:last-child { padding-bottom: 0; }
+        .timeline-card::before {
+            content: ''; position: absolute; left: 28px; top: 0.5rem;
+            width: 2px; height: 100%; background: var(--border-color); 
+        }
+        .timeline-card:last-child::before { display: none; }
+        .timeline-icon {
+            position: absolute; left: 0; top: 0; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--btn-text-color); background: var(--primary-color);
+            border: 2px solid var(--border-color); z-index: 1; transition: all 0.3s;
+        }
+        .section-nav {
+            position: fixed; top: 50%; left: 2rem; transform: translateY(-50%);
+            z-index: 50; display: none;
+        }
+        @media (min-width: 1280px) { .section-nav { display: block; } }
+        .section-nav ul { list-style: none; padding: 0; margin: 0; }
+        .section-nav a {
+            display: flex; align-items: center;
+            padding: 0.5rem 0; color: var(--text-sub);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            position: relative; transition: color 0.3s;
+        }
+        .section-nav a::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background-color: var(--text-sub); border-radius: 50%;
+            margin-right: 1rem; transition: all 0.3s;
+        }
+        .section-nav a.active, .section-nav a:hover { color: var(--primary-color); }
+        .section-nav a.active::before, .section-nav a:hover::before {
+            background-color: var(--primary-color);
+            transform: scale(1.5);
+        }
+        .reveal { opacity: 0; transform: translateY(50px); }
+        .timeline-icon-wrapper {
+            position: relative; z-index: 1;
+        }
+        .timeline-icon-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border-width: 2px; margin: 0 auto;
+            background-color: var(--bg-main);
+            transition: all 0.4s ease-in-out;
+        }
+        .reveal-child:hover .timeline-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+        .flow-diagram .flow-box {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flow-diagram .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+         .btn-custom-text {
+            color: var(--btn-text-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">Loading...</div>
+    <div class="controls-container">
+        <a href="project-generative-ai.html" class="text-[var(--text-sub)] hover:text-[var(--primary-color)] transition-colors font-bold text-lg" aria-label="Switch to Japanese">JP</a> <!-- Link to Japanese version -->
+        <button id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+    </div>
+
+    <header class="fixed top-0 left-0 z-50 p-6">
+        <a href="index_en.html" class="glass-card inline-block px-4 py-2 text-sm hover:!border-[var(--primary-color)] transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Portfolio
+        </a>
+    </header>
+
+    <nav class="section-nav">
+        <ul>
+            <li><a href="#overview" class="active">Overview</a></li>
+            <li><a href="#timeline">Journey</a></li>
+            <li><a href="#challenge">Challenge</a></li>
+            <li><a href="#solution">Transformation</a></li>
+            <li><a href="#action">Process</a></li>
+            <li><a href="#result">Result</a></li>
+            <li><a href="#takeaways">Takeaways</a></li>
+        </ul>
+    </nav>
+
+    <div class="flex">
+        <main class="w-full max-w-screen-lg mx-auto p-4 md:p-12 space-y-24">
+
+            <section id="hero-bg" class="rounded-2xl py-24 md:py-40 mt-16">
+                <div id="hero" class="text-center px-4">
+                    <p class="text-lg text-[var(--primary-color)] font-semibold reveal">PROJECT CASE STUDY</p>
+                    <h1 class="text-4xl md:text-6xl mt-2 mb-6 gradient-text reveal">Radical Business Process Improvement</h1>
+                    <p class="text-xl leading-relaxed font-normal max-w-3xl mx-auto text-[var(--text-main)] reveal">
+                        Reducing time-consuming manual work significantly. The story of a team that automated operations from order to shipment using scripts and APIs. <!-- Revised: hours -> time-consuming, minutes -> significantly -->
+                    </p>
+                </div>
+            </section>
+
+            <section id="overview" data-gsap-stagger>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-user-friends text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Our Role</h3>
+                        <p class="text-[var(--text-sub)]">Automation Promotion Member</p> 
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-cogs text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Key Technologies</h3>
+                        <p class="text-[var(--text-sub)]">Automation Scripts, API, Chat Tool</p> <!-- Revised: Tool names -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-tachometer-alt text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Result</h3>
+                        <p class="text-[var(--text-sub)]">Significant Reduction in Work Time</p> <!-- Revised: Removed percentage -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="timeline">
+                <div class="section-title text-center mb-16">
+                    <h2 class="reveal gradient-text">Project Journey</h2>
+                </div>
+                <div class="relative max-w-4xl mx-auto px-4" data-gsap-stagger>
+                    <div class="absolute top-8 left-0 w-full h-0.5 bg-[var(--border-color)]"></div>
+                    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--secondary-color)]">
+                                    <i class="fas fa-hand-paper text-2xl text-[var(--secondary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Challenge</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Inefficient manual work and<br>communication loss</p>
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--primary-color)]">
+                                    <i class="fas fa-cogs text-2xl text-[var(--primary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Action</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Workflow automation via<br>script and API integration</p> <!-- Revised: Removed GAS -->
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-yellow-400">
+                                    <i class="fas fa-rocket text-2xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Result</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Drastic work time reduction and<br>increased productivity</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="challenge">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Background & Challenges</h2></div>
+                <div class="glass-card p-8 md:p-12 reveal">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-comments text-2xl text-[var(--secondary-color)] mr-4"></i>Situation: Complex Communication</h3>
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                                The SCM department manually gathered information on inventory, orders, and production schedules from multiple, disparate systems to report to stakeholders. This process took many hours daily and was prone to communication losses like missed checks and miscommunications. This resulted in delayed delivery responses to customers and slow reactions to sudden specification changes. <!-- Revised: several hours -> many hours -->
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-exclamation-triangle text-2xl text-yellow-400 mr-4"></i>Difficulty: Departmental Apathy & Limited Resources</h3>
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                                While this was a serious issue for the SCM department, other departments saw it as "business as usual," and there was little momentum for improvement. Furthermore, as a team member without a deep IT background, we had no budget for large-scale system development. The challenge was to achieve maximum impact within the constraints of existing tools and limited authority. <!-- Revised: task force -> team -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        
+            <section id="solution" data-gsap-stagger>
+                <div class="section-title text-center mb-16"><h2 class="reveal-child gradient-text">The Workflow Transformation</h2></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    
+                    <div class="flow-diagram reveal-child">
+                        <div class="glass-card p-8">
+                            <h3 class="text-2xl font-extrabold text-red-500 mb-6 text-center border-b-2 border-red-500 pb-3 whitespace-nowrap">Before: A World of Manual Chaos</h3>
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div class="flow-box glass-card"><i class="fas fa-boxes mr-2"></i>Inventory Data</div>
+                                <div class="flow-box glass-card"><i class="fas fa-file-invoice mr-2"></i>Order Data</div>
+                                <div class="flow-box glass-card"><i class="fas fa-industry mr-2"></i>Prod. Schedule</div>
+                            </div>
+                            <div class="flow-arrow my-4"><i class="fas fa-arrow-down animate-pulse"></i></div>
+                            <div class="flow-box glass-card w-full mb-4 bg-red-100/30 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-400"><i class="fas fa-user-clock mr-2"></i>Staff <span class="font-bold">manually checks</span> each system</div>
+                            <div class="flow-arrow my-4"><i class="fas fa-arrow-down animate-pulse"></i></div>
+                            <div class="flow-box glass-card w-full mb-4 bg-red-100/30 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-400"><i class="fas fa-comments mr-2"></i>Info shared <span class="font-bold">haphazardly</span> via chat/verbally</div>
+                             <div class="flow-arrow my-4"><i class="fas fa-arrow-down animate-pulse"></i></div>
+                            <div class="flow-box glass-card w-full bg-red-500/50 text-white dark:text-gray-100 border-red-500/50"><i class="fas fa-exclamation-triangle mr-2"></i><span class="font-bold">More manual checks & human errors</span></div>
+                        </div>
+                    </div>
+
+                     <div class="flow-diagram reveal-child">
+                        <div class="glass-card p-8">
+                            <h3 class="text-2xl font-extrabold text-green-500 mb-6 text-center border-b-2 border-green-500 pb-3 whitespace-nowrap">After: The Automated Future</h3>
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div class="flow-box glass-card"><i class="fas fa-boxes mr-2"></i>Inventory Data</div>
+                                <div class="flow-box glass-card"><i class="fas fa-file-invoice mr-2"></i>Order Data</div>
+                                <div class="flow-box glass-card"><i class="fas fa-industry mr-2"></i>Prod. Schedule</div>
+                            </div>
+                            <div class="flow-arrow my-4"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flow-box glass-card w-full mb-4 bg-green-100/30 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-400 shadow-lg shadow-green-500/20"><i class="fas fa-code mr-2"></i><span class="font-bold">Automation Script</span> <span class="font-bold">auto-collects</span> all data via API</div> <!-- Revised: Tool name and icon -->
+                            <div class="flow-arrow my-4"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flow-box glass-card w-full mb-4 bg-green-100/30 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-400 shadow-lg shadow-green-500/20"><i class="fas fa-random mr-2"></i>System organizes and <span class="font-bold">determines</span> progress</div>
+                             <div class="flow-arrow my-4"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flow-box glass-card w-full bg-green-500/50 text-white dark:text-gray-100 border-green-500/50"><i class="fas fa-comments mr-2"></i><span class="font-bold">Auto-notifies</span> progress to dedicated <span class="font-bold">Chat threads</span></div> <!-- Revised: Icon -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="action">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Problem-Solving Process</h2></div>
+                <div class="max-w-3xl mx-auto" data-gsap-stagger>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-magnifying-glass-chart"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Analysis & Technology Selection</h3><p class="text-[var(--text-sub)] font-normal">First, we thoroughly visualized the entire information flow from order to shipment—who was communicating what information, from which system, when, and to whom. By untangling this complex web, we identified the key bottlenecks. We decided to use a scripting platform as the automation "hub" because it could integrate across systems and be developed quickly.</p></div> <!-- Revised: Removed GAS -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-cogs"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">API Integration</h3><p class="text-[var(--text-sub)] font-normal">We investigated the API specifications of each business system and developed scripts to automatically fetch the necessary data. This built the foundation for a program to periodically and accurately collect information that staff used to copy and paste manually, breaking down information silos and paving the way for centralized data handling.</p></div> <!-- Revised: Removed GAS -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-brain"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Developing Intelligent Notification Logic</h3><p class="text-[var(--text-sub)] font-normal">We focused not just on collecting information, but also on automating its "communication."<br>We developed logic to post progress updates to dedicated, auto-generated threads on the chat tool for each order, mentioning only the relevant stakeholders.<br>This prevented information overload and missed updates.</p></div> <!-- Revised: Removed Chatwork -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-rocket"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Implementation & Measurement</h3><p class="text-[var(--text-sub)] font-normal">We implemented the developed tool into actual operations and trained the staff. After implementation, we measured the time spent on information sharing and quantitatively proved that a task that took "many hours" was reduced to a "short time." This success was highly evaluated and sparked interest from other departments to adopt a similar system.</p></div> <!-- Revised: Specific times abstracted -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="result">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Value Delivered</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-stopwatch-20 text-5xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">Drastic Reduction in Work Time</h3> 
+                        <p class="text-4xl font-bold gradient-text my-4">Significant Shortening</p> <!-- Revised: Qualitative expression -->
+                        <p class="text-[var(--text-sub)]">Time-consuming daily manual work was significantly shortened, allowing staff to shift to higher-value core duties.</p> 
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-check-circle text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">Elimination of Human Error</h3>
+                        <p class="text-[var(--text-sub)] mt-4">Eliminating data entry and transfer mistakes dramatically improved data accuracy and operational reliability.</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                         <i class="fas fa-sync-alt text-5xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Real-time Information Sharing</h3>
+                        <p class="text-[var(--text-sub)] mt-4">Stakeholders could now get the latest status just by checking the chat tool, drastically reducing meetings and check-in messages.</p> <!-- Revised: Tool name -->
+                    </div>
+                     <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-users-cog text-5xl text-[var(--secondary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Improved Organizational Productivity</h3>
+                        <p class="text-[var(--text-sub)] mt-4">Even as workload increased, efficiency gains allowed for flexible staffing, contributing to a resilient and sustainable organizational structure.</p> <!-- Revised: Percentage removed, staffing phrasing -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="takeaways">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Takeaways & Replicability</h2></div>
+                <div class="grid grid-cols-1 gap-8">
+                     <div class="glass-card p-8 md:p-12 reveal">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-users text-2xl text-[var(--secondary-color)] mr-4"></i>The Importance of the "User's Perspective"</h3>
+                        <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                           Initially, we were captivated by the technical aspects and built a prototype without sufficient input from the end-users. This resulted in rework, but the experience taught me how crucial it is to "stand in the user's shoes." I believe this lesson was key to the ultimate success of a tool that the team was happy to use. 
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-tools text-[var(--primary-color)] mr-3"></i>Skills Used</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-center"><i class="fas fa-code mr-3 text-yellow-400"></i>Automation Scripting (e.g., GAS)</li> <!-- Revised: Tool name and icon -->
+                                <li class="flex items-center"><i class="fas fa-plug mr-3 text-blue-400"></i>API Integration (REST)</li>
+                                <li class="flex items-center"><i class="fas fa-comments mr-3 text-pink-400"></i>Messaging API</li> <!-- Revised: Tool name and icon -->
+                                <li class="flex items-center"><i class="fas fa-tasks mr-3 text-green-400"></i>Business Process Analysis & Design</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>Replication Points</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Start Small:</strong> Instead of large-scale development, use existing tools (like office suites) to quickly prove value.</p></li> <!-- Revised: Removed Google Workspace -->
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Focus on the Bottleneck:</strong> Target the most inefficient part of the workflow, such as "information gathering and communication."</p></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Design the "Notification":</strong> Don't just collect data; design "who, when, and what" gets communicated to automate communication.</p></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center reveal">
+                 <a href="index_en.html" class="inline-block bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[var(--primary-color)]/20 btn-custom-text">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Portfolio
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docHtml = document.documentElement;
+            
+            // --- THEME ---
+            const loader = document.getElementById('loader');
+            if (loader) { 
+                 loader.classList.add('hidden');
+            } else {
+                console.error("Loader element not found!"); 
+            }
+            
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleIcon = themeToggle.querySelector('i');
+            
+            function applyTheme() {
+                const isDark = docHtml.classList.contains('dark');
+                toggleIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                docHtml.classList.toggle('dark');
+                localStorage.setItem('theme', docHtml.classList.contains('dark') ? 'dark' : 'light');
+                applyTheme();
+            });
+
+            // Initial theme application
+            applyTheme();
+            
+            // GSAP Animations
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('[data-gsap-stagger]').forEach(container => {
+                const targets = container.querySelectorAll('.reveal-child');
+                gsap.fromTo(targets, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: container, start: 'top 85%', toggleActions: 'play none none none' }
+                });
+            });
+            gsap.utils.toArray('.reveal').forEach(elem => {
+                gsap.fromTo(elem, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+                    scrollTrigger: { trigger: elem, start: 'top 90%', toggleActions: 'play none none none' }
+                });
+            });
+            // Counter animation script removed
+            
+            // Section Navigation Active State
+            const sections = gsap.utils.toArray('main section');
+            const navLinks = gsap.utils.toArray('.section-nav a');
+            sections.forEach(section => {
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: 'top center',
+                    end: 'bottom center',
+                    onToggle: self => {
+                        const navLink = document.querySelector(`.section-nav a[href="#${section.id}"]`);
+                        if (navLink) {
+                            if (self.isActive) {
+                                navLinks.forEach(link => link.classList.remove('active'));
+                                navLink.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

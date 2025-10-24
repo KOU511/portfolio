@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事例紹介 - Python需要予測シミュレーター開発</title>
+
+    <!-- SEO & OGP -->
+    <meta name="description" content="データサイエンスで未来を予測し、従来の在庫管理手法から脱却。データドリブンな在庫最適化への挑戦を描いたプロジェクト事例。"> <!-- 修正: 勘と経験 -> 従来の在庫管理手法 -->
+    <meta property="og:title" content="事例紹介 - Python需要予測シミュレーター開発">
+    <meta property="og:description" content="Pythonを用いて時系列クラスタリングと需要予測モデルを構築。パラメータ調整可能なシミュレーターの原型を開発しました。"> 
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://kou511.github.io/my-portfolio/project-forecast-simulator.html"> 
+    <meta property="og:image" content="https://kou511.github.io/my-portfolio/images/ogp-python-forecast.webp"> 
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.webp">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    
+    <!-- Flicker-Fix Script (Default to Dark Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark
+        }
+    </script>
+
+    <!-- Fonts, CSS, Icons -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP & Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            /* Light Mode Theme */
+            --primary-color: #03887B;      /* Deep Mint Green */
+            --secondary-color: #6F2DA8;   /* Deep Purple */
+            --bg-main: #FAFAFA;           /* Bright off-white */
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border-color: #e5e5e5;      /* Neutral-200 */
+            --text-main: #212121;         /* Deep black */
+            --text-sub: #737373;          /* Neutral-500 */
+            --shadow-color: rgba(0,0,0,0.07);
+            --dynamic-grad-opacity: 0.05;
+            --btn-text-color: #FAFAFA;
+            --accent-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        html.dark {
+            /* Dark Mode Theme */
+            --primary-color: #00CBAA;      /* Emerald Green */
+            --secondary-color: #9D4EDD;   /* Vibrant Violet */
+            --bg-main: #171717;           /* Near-black gray */
+            --bg-card: rgba(39, 39, 39, 0.6); /* Translucent #272727 */
+            --border-color: rgba(0, 203, 170, 0.2); /* Translucent primary */
+            --text-main: #F3F3F3;         /* Pure white */
+            --text-sub: #a1a1aa;          /* Mid-gray */
+            --shadow-color: rgba(0,0,0,0.5);
+            --dynamic-grad-opacity: 0.07;
+            --btn-text-color: #171717;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.4s, color 0.4s;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, var(--primary-color), transparent 40%),
+                        radial-gradient(circle at 85% 30%, var(--secondary-color), transparent 40%),
+                        radial-gradient(circle at 50% 90%, #3a2d80, transparent 50%);
+            background-color: var(--bg-main); opacity: var(--dynamic-grad-opacity); z-index: -1;
+            animation: gradient-flow 20s ease-in-out infinite;
+            transition: opacity 0.4s;
+        }
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+            50% { background-position: 100% 50%, 100% 50%, 100% 50%; }
+        }
+        .glass-card {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); background-repeat: repeat; opacity: 0.025; }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: rgba(0, 203, 170, 0.5);
+        }
+
+        #loader {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-main); color: var(--primary-color);
+            font-size: 2rem; font-weight: bold;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        
+        .controls-container {
+            position: fixed; 
+            top: 1.5rem; right: 1.5rem; 
+            z-index: 51;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #theme-toggle {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        #theme-toggle i { color: var(--text-sub); transition: color 0.3s, transform 0.3s; }
+        #theme-toggle:hover i { color: var(--primary-color); transform: rotate(15deg); }
+
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+        #hero-bg {
+            background-image: url('images/python.webp');
+            background-size: cover; background-position: center; position: relative;
+        }
+        #hero-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(23, 23, 23, 0.9) 0%, rgba(23, 23, 23, 0.7) 100%);
+            z-index: 1;
+        }
+        html:not(.dark) #hero-bg::before {
+            background: linear-gradient(180deg, rgba(250, 250, 250, 0.9) 0%, rgba(250, 250, 250, 0.7) 100%);
+        }
+        #hero-bg > * { position: relative; z-index: 2; }
+
+        .timeline-card { 
+            position: relative; padding-left: 4rem; padding-bottom: 2.5rem;
+        }
+        .timeline-card:last-child { padding-bottom: 0; }
+        .timeline-card::before {
+            content: ''; position: absolute; left: 28px; top: 0.5rem;
+            width: 2px; height: 100%; background: var(--border-color); 
+        }
+        .timeline-card:last-child::before { display: none; }
+        
+        .timeline-icon {
+            position: absolute; left: 0; top: 0; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--btn-text-color); background: var(--primary-color);
+            border: 2px solid var(--border-color); z-index: 1; transition: all 0.3s;
+        }
+        .section-nav {
+            position: fixed; top: 50%; left: 2rem; transform: translateY(-50%);
+            z-index: 50; display: none;
+        }
+        @media (min-width: 1280px) { .section-nav { display: block; } }
+        .section-nav ul { list-style: none; padding: 0; margin: 0; }
+        .section-nav a {
+            display: flex; align-items: center;
+            padding: 0.5rem 0; color: var(--text-sub);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            position: relative; transition: color 0.3s;
+        }
+        .section-nav a::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background-color: var(--text-sub); border-radius: 50%;
+            margin-right: 1rem; transition: all 0.3s;
+        }
+        .section-nav a.active, .section-nav a:hover { color: var(--primary-color); }
+        .section-nav a.active::before, .section-nav a:hover::before {
+            background-color: var(--primary-color);
+            transform: scale(1.5);
+        }
+        .reveal { opacity: 0; transform: translateY(50px); }
+        .timeline-icon-wrapper {
+            position: relative; z-index: 1;
+        }
+        .timeline-icon-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border-width: 2px; margin: 0 auto;
+            background-color: var(--bg-main);
+            transition: all 0.4s ease-in-out;
+        }
+        .reveal-child:hover .timeline-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+        .btn-custom-text {
+            color: var(--btn-text-color);
+        }
+        .cluster-filter-btn {
+            padding: 0.25rem 0.75rem; border-radius: 9999px;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s;
+            background-color: var(--bg-card); color: var(--text-sub);
+            border: 1px solid var(--border-color);
+        }
+        .cluster-filter-btn:hover {
+            border-color: var(--text-sub);
+        }
+        .cluster-filter-btn.active {
+            color: var(--btn-text-color) !important;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">Loading...</div>
+    <div class="controls-container">
+        <a href="project-forecast-simulator_en.html" class="text-[var(--text-sub)] hover:text-[var(--primary-color)] transition-colors font-bold text-lg" aria-label="Switch to English">EN</a>
+        <button id="theme-toggle" aria-label="テーマを切り替える"><i class="fas fa-sun"></i></button>
+    </div>
+
+    <header class="fixed top-0 left-0 z-50 p-6">
+        <a href="index.html" class="glass-card inline-block px-4 py-2 text-sm hover:!border-[var(--primary-color)] transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>ポートフォリオに戻る
+        </a>
+    </header>
+
+    <nav class="section-nav">
+        <ul>
+            <li><a href="#overview" class="active">概要</a></li>
+            <li><a href="#timeline">道のり</a></li>
+            <li><a href="#challenge">課題</a></li>
+            <li><a href="#action">プロセス</a></li>
+            <li><a href="#result">成果</a></li>
+            <li><a href="#takeaways">学び</a></li>
+        </ul>
+    </nav>
+
+    <div class="flex">
+        <main class="w-full max-w-screen-lg mx-auto p-4 md:p-12 space-y-24">
+
+            <section id="hero-bg" class="rounded-2xl py-24 md:py-40 mt-16">
+                <div id="hero" class="text-center px-4">
+                    <p class="text-lg text-[var(--primary-color)] font-semibold reveal">PROJECT CASE STUDY</p>
+                    <h1 class="text-4xl md:text-6xl mt-2 mb-6 gradient-text reveal">Python需要予測シミュレーター開発</h1>
+                    <p class="text-xl leading-relaxed font-normal max-w-3xl mx-auto text-[var(--text-main)] reveal">
+                        従来の在庫管理手法からの脱却。データサイエンスで未来を予測し、データドリブンな在庫最適化への挑戦。 <!-- 修正: 勘と経験 -> 従来の在庫管理手法 -->
+                    </p>
+                </div>
+            </section>
+
+            <section id="overview" data-gsap-stagger>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-user-tie text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">私たちの役割</h3>
+                        <p class="text-[var(--text-sub)]">データアナリスト / DXリーダー候補</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-calendar-alt text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">プロジェクト期間</h3>
+                        <p class="text-[var(--text-sub)]">約3ヶ月 (教育プログラム期間)</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-check-double text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">目的</h3>
+                        <p class="text-[var(--text-sub)]">属人化解消 & 在庫最適化</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="timeline">
+                <div class="section-title text-center mb-16">
+                    <h2 class="reveal gradient-text">プロジェクトの道のり</h2>
+                </div>
+                <div class="relative max-w-4xl mx-auto px-4" data-gsap-stagger>
+                    <div class="absolute top-8 left-0 w-full h-0.5 bg-[var(--border-color)]"></div>
+                    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--secondary-color)]">
+                                    <i class="fas fa-brain text-2xl text-[var(--secondary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">課題</h3>
+                            <p class="text-sm text-[var(--text-sub)]">経験則に頼る在庫管理と<br>複雑な需要変動</p> <!-- 修正: 経験と勘 -> 経験則 -->
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--primary-color)]">
+                                    <i class="fab fa-python text-2xl text-[var(--primary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">行動</h3>
+                            <p class="text-sm text-[var(--text-sub)]">データ分析に基づく<br>Pythonでの予測モデル開発</p>
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-yellow-400">
+                                    <i class="fas fa-project-diagram text-2xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">成果</h3>
+                            <p class="text-sm text-[var(--text-sub)]">客観的な意思決定プロセスと<br>全社的な取り組みへの発展</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="challenge">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">背景と直面した困難</h2></div>
+                <div class="glass-card p-8 md:p-12 reveal">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-user-cog text-2xl text-[var(--secondary-color)] mr-4"></i>Situation: 従来の在庫管理手法</h3> <!-- 修正: 経験と勘に依存 -> 従来の -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                               本プロジェクトの対象となった製品群は、需要予測を担当者の経験則に大きく依存していました。その結果、在庫レベルの決定に客観的な根拠が乏しく、過剰在庫によるキャッシュフローへの影響や、欠品による機会損失のリスクを常に抱えている状態でした。 <!-- 修正: ベテラン担当者の経験と勘 -> 担当者の経験則, 悪化 -> への影響 -->
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-wave-square text-2xl text-yellow-400 mr-4"></i>Difficulty: 複雑な需要変動とデータ品質</h3>
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                               需要は季節性や不定期なイベントなど、様々な要因で複雑に変動するため、単純な統計手法では精度の高い予測は困難でした。また、分析に使用する過去の出荷データには欠損値や外れ値が含まれており、予測モデルを構築する前に、データクレンジングと前処理が必要でした。 <!-- 修正: 地道な -> (削除), 必要不可欠でした -> 必要でした -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        
+            <section id="action">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">データサイエンスによる課題解決プロセス</h2></div>
+                <div class="max-w-3xl mx-auto" data-gsap-stagger>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-layer-group"></i></div>
+                        <div class="glass-card p-8">
+                            <h3 class="text-xl mb-2">SKU別・時系列クラスタリング</h3>
+                            <p class="text-[var(--text-sub)] font-normal">まず、データ処理ライブラリでデータをクレンジングした後、SKUごとの需要変動パターンを正規化。時系列分析ライブラリを用いて時系列クラスタリングを実施し、「安定需要」「季節性需要」「不規則需要」といった需要特徴のグループ化を行いました。これにより、画一的ではない、SKU群の特性に応じた予測アプローチの土台を築きました。</p> <!-- 修正: Pandas -> データ処理ライブラリ -->
+                            <div class="mt-4 rounded-lg border border-[var(--border-color)] p-4 bg-[var(--bg-main)]/50">
+                                <div id="cluster-filters" class="flex flex-wrap items-center gap-2 mb-4">
+                                    <!-- Filter buttons will be inserted by JS -->
+                                </div>
+                                <div class="relative h-64 md:h-80">
+                                    <canvas id="clusteringChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-sliders-h"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">インタラクティブな予測ツールのプロトタイピング</h3><p class="text-[var(--text-sub)] font-normal">分析ツール上で、予測ツール（シミュレーター）の原型を開発。ユーザーが製品を選択すると、そのSKUが属するクラスター情報（安定/季節性など）を表示。さらに、予測に用いるボラティリティ（変動性）や安全在庫率のパラメータをスライダーで直感的に調整できるように設計し、「もしこうだったら」という仮説検証を容易にしました。</p></div> <!-- 修正: Jupyter Notebook -> 分析ツール -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">結果の可視化と経営層への提案</h3><p class="text-[var(--text-sub)] font-normal">シミュレーション結果をグラフ化ツールで可視化し、「安全在庫をX%に設定すると、欠品率はY%に抑えられるが、予測される過剰在庫額はZ円になる」といった具体的なトレードオフ関係を提示。データに基づいた在庫最適化がいかに事業に貢献できるかを経営層にプレゼンテーションし、全社的な改善プロジェクトとしての承認を得ました。</p></div> <!-- 修正: MatplotlibやSeaborn -> グラフ化ツール -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="result">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">プロジェクトがもたらした価値</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-lightbulb text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">意思決定の質の向上</h3>
+                        <p class="text-[var(--text-sub)]">属人的な判断から、データに基づいた客観的で再現性の高い意思決定プロセスへと変革しました。</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-search-dollar text-5xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">コスト削減機会の可視化</h3>
+                        <p class="text-[var(--text-sub)]">在庫レベルと欠品リスクの関係性を可視化し、<span class="font-semibold text-[var(--text-main)]">大規模な</span>コスト削減機会があることを具体的に提示しました。</p> 
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-trophy text-5xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">全社的な取り組みへと発展</h3> 
+                        <p class="text-[var(--text-sub)]">教育プログラム内での成果が認められ、在庫最適化への取り組みが全社的に拡大しました。</p>
+                    </div>
+                     <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-chart-bar text-5xl text-[var(--secondary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">データドリブン文化の醸成支援</h3> <!-- 修正: 醸成 -> 醸成支援 -->
+                        <p class="text-[var(--text-sub)]">この取り組みが触媒となり、他部署でもデータ活用の機運が高まり、組織全体のデータリテシー向上に貢献。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="takeaways">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">学びと再現性</h2></div>
+                <div class="grid grid-cols-1 gap-8">
+                     <div class="glass-card p-8 md:p-12 reveal">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-users text-2xl text-[var(--secondary-color)] mr-4"></i>技術とビジネスの「翻訳」の重要性</h3>
+                        <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                           予測モデルを構築するだけでは、ビジネスの現場では価値を生みません。モデルの精度を追求すること以上に、「この分析結果が、現場のどのような意思決定に、どう役立つのか」を分かりやすく伝え、誰もが使えるツールとして提供することの重要性を痛感しました。データ分析担当者の役割は、単なる分析者ではなく、データとビジネスの間に立つ「翻訳家」であるべきだと学びました。 <!-- 修正: 高度なモデル -> 予測モデル, データサイエンティスト -> データ分析担当者 -->
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-tools text-[var(--primary-color)] mr-3"></i>使用スキル</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-center"><i class="fab fa-python mr-3 text-yellow-400"></i>Python (データ処理, 時系列分析ライブラリ)</li> <!-- 修正: Pandas -> データ処理 -->
+                                <li class="flex items-center"><i class="fas fa-chart-area mr-3 text-blue-400"></i>データ分析 (EDA, 可視化)</li>
+                                <li class="flex items-center"><i class="fas fa-project-diagram mr-3 text-green-400"></i>時系列クラスタリング</li>
+                                <li class="flex items-center"><i class="fas fa-laptop-code mr-3 text-indigo-400"></i>UIプロトタイピング (分析ツール)</li> <!-- 修正: Jupyter -> 分析ツール -->
+                            </ul>
+                        </div>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>再現ポイント</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>分類から始める:</strong> 多様なSKUを闇雲に分析せず、まず時系列クラスタリングで需要パターンをグループ化する。</p></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>対話型ツールを作る:</strong> 分析者だけが分かるモデルではなく、現場担当者がパラメータを調整できるシミュレーターを提供する。</p></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>ビジネスインパクトを語る:</strong> モデルの精度ではなく、「コスト削減額」や「欠品率」など、ビジネスの言葉で価値を伝える。</p></li> 
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center reveal">
+                 <a href="index.html" class="inline-block bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[var(--primary-color)]/20 btn-custom-text">
+                    <i class="fas fa-arrow-left mr-2"></i> ポートフォリオに戻る
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docHtml = document.documentElement;
+            let clusteringChart;
+
+            function getThemeColors() {
+                const isDark = docHtml.classList.contains('dark');
+                return {
+                    primary: isDark ? '#00CBAA' : '#03887B',
+                    secondary: isDark ? '#9D4EDD' : '#6F2DA8',
+                    yellow: '#fbbf24', // Use Tailwind yellow-400 color
+                    textSub: isDark ? '#a1a1aa' : '#737373',
+                    grid: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                };
+            }
+            
+            // --- THEME ---
+            window.onload = () => { document.getElementById('loader').classList.add('hidden'); };
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleIcon = themeToggle.querySelector('i');
+            
+            function applyTheme() {
+                const isDark = docHtml.classList.contains('dark');
+                toggleIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+                // Update chart colors if chart exists
+                if (clusteringChart) {
+                    const colors = getThemeColors();
+                    clusteringChart.options.scales.y.ticks.color = colors.textSub;
+                    clusteringChart.options.scales.x.ticks.color = colors.textSub;
+                    clusteringChart.options.scales.y.grid.color = colors.grid;
+                     // Update existing dataset colors based on cluster and theme
+                    clusteringChart.data.datasets.forEach(dataset => {
+                        if (dataset.cluster === 'stable') dataset.borderColor = colors.primary;
+                        if (dataset.cluster === 'seasonal') dataset.borderColor = colors.secondary;
+                        if (dataset.cluster === 'irregular') dataset.borderColor = colors.yellow;
+                    });
+                    clusteringChart.update();
+                }
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                docHtml.classList.toggle('dark');
+                localStorage.setItem('theme', docHtml.classList.contains('dark') ? 'dark' : 'light');
+                applyTheme();
+            });
+
+            // Initial theme application (default dark)
+             if (localStorage.getItem('theme') === 'light') {
+                docHtml.classList.remove('dark');
+            } else {
+                 docHtml.classList.add('dark');
+            }
+            applyTheme();
+
+            // GSAP Animations
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('[data-gsap-stagger]').forEach(container => {
+                const targets = container.querySelectorAll('.reveal-child');
+                gsap.fromTo(targets, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: container, start: 'top 85%' }
+                });
+            });
+            gsap.utils.toArray('.reveal').forEach(elem => {
+                gsap.fromTo(elem, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+                    scrollTrigger: { trigger: elem, start: 'top 90%' }
+                });
+            });
+            // Counter animation removed as the specific number is removed
+
+            // Section Navigation Active State
+            const sections = gsap.utils.toArray('main section');
+            const navLinks = gsap.utils.toArray('.section-nav a');
+            sections.forEach(section => {
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: 'top center',
+                    end: 'bottom center',
+                    onToggle: self => {
+                        const navLink = document.querySelector(`.section-nav a[href="#${section.id}"]`);
+                        if (navLink) {
+                            if (self.isActive) {
+                                navLinks.forEach(link => link.classList.remove('active'));
+                                navLink.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // --- Time Series Clustering Chart ---
+            const clusteringChartCanvas = document.getElementById('clusteringChart');
+            if (clusteringChartCanvas) {
+                const ctx = clusteringChartCanvas.getContext('2d');
+                const filtersContainer = document.getElementById('cluster-filters');
+
+                // Function to generate sample time series data
+                const generateSeries = (type, length = 52) => {
+                    const series = [];
+                    let value = 100; // Starting value
+                    for (let i = 0; i < length; i++) {
+                        let step;
+                        switch (type) {
+                            case 'stable': 
+                                step = (Math.random() - 0.5) * 5; // Small random walk
+                                value += step;
+                                break;
+                            case 'seasonal': 
+                                const seasonalFactor = Math.sin(i / length * Math.PI * 4) * 20; // Stronger seasonal component
+                                step = (Math.random() - 0.5) * 8;
+                                value = 100 + seasonalFactor + step;
+                                break;
+                            case 'irregular': 
+                                step = (Math.random() - 0.5) * 15; // More volatile random walk
+                                value += step;
+                                if (Math.random() < 0.08) { // Occasional larger jumps
+                                    value += (Math.random() - 0.5) * 50;
+                                }
+                                break;
+                            default: value = 0;
+                        }
+                        series.push(value < 0 ? 0 : Math.round(value)); // Ensure non-negative and round
+                    }
+                    return series;
+                };
+                
+                // Define datasets with cluster labels
+                const datasets = [
+                    { label: 'SKU A001 (安定)', data: generateSeries('stable'), cluster: 'stable', hidden: false },
+                    { label: 'SKU A002 (安定)', data: generateSeries('stable'), cluster: 'stable', hidden: false },
+                    { label: 'SKU B001 (季節)', data: generateSeries('seasonal'), cluster: 'seasonal', hidden: false },
+                    { label: 'SKU B002 (季節)', data: generateSeries('seasonal'), cluster: 'seasonal', hidden: false },
+                    { label: 'SKU C001 (不規則)', data: generateSeries('irregular'), cluster: 'irregular', hidden: false },
+                    { label: 'SKU C002 (不規則)', data: generateSeries('irregular'), cluster: 'irregular', hidden: false },
+                ];
+                
+                // Initial theme colors for chart setup
+                const initialColors = getThemeColors();
+
+                // Chart configuration
+                const chartConfig = {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: 52 }, (_, i) => `W${i + 1}`),
+                        datasets: datasets.map(d => ({
+                             ...d, 
+                             borderWidth: 1.5, 
+                             pointRadius: 0, 
+                             tension: 0.1,
+                             // Set initial border color based on cluster
+                             borderColor: d.cluster === 'stable' ? initialColors.primary : 
+                                         d.cluster === 'seasonal' ? initialColors.secondary : 
+                                         initialColors.yellow
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: false }, // Hide legend
+                            tooltip: { 
+                                mode: 'index', 
+                                intersect: false,
+                                // Customize tooltip appearance
+                                titleColor: 'var(--text-main)', 
+                                bodyColor: 'var(--text-sub)', 
+                                backgroundColor: 'var(--bg-card)',
+                                borderColor: 'var(--border-color)',
+                                borderWidth: 1
+                            } 
+                        },
+                        scales: {
+                            y: { 
+                                ticks: { color: initialColors.textSub }, 
+                                grid: { color: initialColors.grid } 
+                            },
+                            x: { 
+                                ticks: { 
+                                    color: initialColors.textSub,
+                                    maxRotation: 0, 
+                                    autoSkip: true, 
+                                    maxTicksLimit: 10 // Limit labels shown
+                                }, 
+                                grid: { display: false } 
+                            }
+                        }
+                    }
+                };
+                
+                // Create the chart instance
+                clusteringChart = new Chart(ctx, chartConfig);
+
+                // Cluster definitions and filter buttons
+                const clusters = {
+                    'all': { name: 'すべて表示' }, // 'Display All'
+                    'stable': { name: '安定需要', colorKey: 'primary' }, // 'Stable Demand'
+                    'seasonal': { name: '季節性需要', colorKey: 'secondary' }, // 'Seasonal Demand'
+                    'irregular': { name: '不規則需要', colorKey: 'yellow' }, // 'Irregular Demand'
+                };
+
+                // Create filter buttons dynamically
+                Object.keys(clusters).forEach(key => {
+                    const btn = document.createElement('button');
+                    btn.textContent = clusters[key].name;
+                    btn.dataset.cluster = key;
+                    btn.className = 'cluster-filter-btn';
+                    if (key === 'all') btn.classList.add('active'); // Activate 'All' initially
+                    filtersContainer.appendChild(btn);
+                });
+                
+                // Add event listener to the container for filter buttons
+                filtersContainer.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'BUTTON') return; // Ignore clicks not on buttons
+                    
+                    const selectedCluster = e.target.dataset.cluster;
+                    
+                    // Update button active states
+                    filtersContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    // Update chart dataset visibility and colors based on selection and theme
+                    const currentColors = getThemeColors();
+                    clusteringChart.data.datasets.forEach(dataset => {
+                        // Hide/show dataset
+                        dataset.hidden = !(selectedCluster === 'all' || dataset.cluster === selectedCluster);
+                        
+                        // Update border color based on cluster and current theme
+                        if (dataset.cluster === 'stable') dataset.borderColor = currentColors.primary;
+                        else if (dataset.cluster === 'seasonal') dataset.borderColor = currentColors.secondary;
+                        else if (dataset.cluster === 'irregular') dataset.borderColor = currentColors.yellow;
+                    });
+                    
+                    // Update the chart
+                    clusteringChart.update();
+                });
+
+                // Apply initial filter state ('all')
+                applyTheme(); // Ensure colors are correct on load
+                
+            } // End of chart logic
+        });
+    </script>
+</body>
+</html>

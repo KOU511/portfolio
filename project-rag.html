@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事例紹介 - 社内規程AI Bot導入</title>
+
+    <!-- SEO & OGP -->
+    <meta name="description" content="煩雑な規程検索をAIとの対話で解決。AIツールを活用し、ソースドキュメントの最適化によって応答性能を大幅に向上させたナレッジマネジメント改革。"> <!-- 修正: NotebookLM, 47%削除 -->
+    <meta property="og:title" content="事例紹介 - 社内規程AI Bot導入">
+    <meta property="og:description" content="RAG対応ツールを活用したシステムで、煩雑な社内規程の検索を対話形式で解決。ソースの最適化により応答性能を大幅に向上させました。"> <!-- 修正: NotebookLM, 47%削除 -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://kou511.github.io/my-portfolio/project-rag.html"> <!-- URL更新 -->
+    <meta property="og:image" content="https://kou511.github.io/my-portfolio/images/ogp-rag.webp"> <!-- URL更新 -->
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.webp">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Flicker-Fix Script (Default to Dark Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark
+        }
+    </script>
+
+    <!-- Fonts, CSS, Icons -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            /* Light Mode Theme */
+            --primary-color: #03887B;      /* Deep Mint Green */
+            --secondary-color: #6F2DA8;   /* Deep Purple */
+            --bg-main: #FAFAFA;           /* Bright off-white */
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border-color: #e5e5e5;      /* Neutral-200 */
+            --text-main: #212121;         /* Deep black */
+            --text-sub: #737373;          /* Neutral-500 */
+            --shadow-color: rgba(0,0,0,0.07);
+            --dynamic-grad-opacity: 0.05;
+            --btn-text-color: #FAFAFA;
+            --accent-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        html.dark {
+            /* Dark Mode Theme */
+            --primary-color: #00CBAA;      /* Emerald Green */
+            --secondary-color: #9D4EDD;   /* Vibrant Violet */
+            --bg-main: #171717;           /* Near-black gray */
+            --bg-card: rgba(39, 39, 39, 0.6); /* Translucent #272727 */
+            --border-color: rgba(0, 203, 170, 0.2); /* Translucent primary */
+            --text-main: #F3F3F3;         /* Pure white */
+            --text-sub: #a1a1aa;          /* Mid-gray */
+            --shadow-color: rgba(0,0,0,0.5);
+            --dynamic-grad-opacity: 0.07;
+            --btn-text-color: #171717;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.4s, color 0.4s;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, var(--primary-color), transparent 40%),
+                        radial-gradient(circle at 85% 30%, var(--secondary-color), transparent 40%),
+                        radial-gradient(circle at 50% 90%, #3a2d80, transparent 50%);
+            background-color: var(--bg-main); opacity: var(--dynamic-grad-opacity); z-index: -1;
+            animation: gradient-flow 20s ease-in-out infinite;
+            transition: opacity 0.4s;
+        }
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+            50% { background-position: 100% 50%, 100% 50%, 100% 50%; }
+        }
+        .glass-card {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); background-repeat: repeat; opacity: 0.025; }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: rgba(0, 203, 170, 0.5);
+        }
+        #loader {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-main); color: var(--primary-color);
+            font-size: 2rem; font-weight: bold;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        
+        .controls-container {
+            position: fixed; 
+            top: 1.5rem; right: 1.5rem; 
+            z-index: 51;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #theme-toggle {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; 
+        }
+        #theme-toggle i { color: var(--text-sub); transition: color 0.3s, transform 0.3s; }
+        #theme-toggle:hover i { color: var(--primary-color); transform: rotate(15deg); }
+        
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+        #hero-bg {
+            background-image: url('images/RAG.webp');
+            background-size: cover; background-position: center; position: relative;
+        }
+        #hero-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(23, 23, 23, 0.9) 0%, rgba(23, 23, 23, 0.7) 100%);
+            z-index: 1;
+        }
+        html:not(.dark) #hero-bg::before {
+             background: linear-gradient(180deg, rgba(250, 250, 250, 0.9) 0%, rgba(250, 250, 250, 0.7) 100%);
+        }
+        #hero-bg > * { position: relative; z-index: 2; }
+
+        .timeline-card { 
+            position: relative; padding-left: 4rem; padding-bottom: 2.5rem;
+        }
+        .timeline-card:last-child { padding-bottom: 0; }
+        .timeline-card::before {
+            content: ''; position: absolute; left: 28px; top: 0.5rem;
+            width: 2px; height: 100%; background: var(--border-color); 
+        }
+        .timeline-card:last-child::before { display: none; }
+        .timeline-icon {
+            position: absolute; left: 0; top: 0; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--btn-text-color); background: var(--primary-color);
+            border: 2px solid var(--border-color); z-index: 1; transition: all 0.3s;
+        }
+        .section-nav {
+            position: fixed; top: 50%; left: 2rem; transform: translateY(-50%);
+            z-index: 50; display: none;
+        }
+        @media (min-width: 1280px) { .section-nav { display: block; } }
+        .section-nav ul { list-style: none; padding: 0; margin: 0; }
+        .section-nav a {
+            display: flex; align-items: center;
+            padding: 0.5rem 0; color: var(--text-sub);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            position: relative; transition: color 0.3s;
+        }
+        .section-nav a::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background-color: var(--text-sub); border-radius: 50%;
+            margin-right: 1rem; transition: all 0.3s;
+        }
+        .section-nav a.active, .section-nav a:hover { color: var(--primary-color); }
+        .section-nav a.active::before, .section-nav a:hover::before {
+            background-color: var(--primary-color);
+            transform: scale(1.5);
+        }
+        .reveal { opacity: 0; transform: translateY(50px); }
+        .timeline-icon-wrapper {
+            position: relative; z-index: 1;
+        }
+        .timeline-icon-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border-width: 2px; margin: 0 auto;
+            background-color: var(--bg-main);
+            transition: all 0.4s ease-in-out;
+        }
+        .reveal-child:hover .timeline-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+        .flow-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            height: 100%;
+        }
+        .flow-icon {
+            font-size: 1.5rem; width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .flow-arrow {
+            color: var(--text-sub); font-size: 1.5rem; margin: 0.5rem 0; text-align: center;
+        }
+         .btn-custom-text {
+            color: var(--btn-text-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">Loading...</div>
+    <div class="controls-container">
+        <a href="project-rag_en.html" class="text-[var(--text-sub)] hover:text-[var(--primary-color)] transition-colors font-bold text-lg" aria-label="Switch to English">EN</a>
+        <button id="theme-toggle" aria-label="テーマを切り替える"><i class="fas fa-sun"></i></button>
+    </div>
+
+    <header class="fixed top-0 left-0 z-50 p-6">
+        <a href="index.html" class="glass-card inline-block px-4 py-2 text-sm hover:!border-[var(--primary-color)] transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>ポートフォリオに戻る
+        </a>
+    </header>
+
+    <nav class="section-nav">
+        <ul>
+            <li><a href="#overview" class="active">概要</a></li>
+            <li><a href="#timeline">道のり</a></li>
+            <li><a href="#challenge">課題</a></li>
+            <li><a href="#solution">変革</a></li>
+            <li><a href="#action">プロセス</a></li>
+            <li><a href="#result">成果</a></li>
+            <li><a href="#takeaways">学び</a></li>
+        </ul>
+    </nav>
+
+    <div class="flex">
+        <main class="w-full max-w-screen-lg mx-auto p-4 md:p-12 space-y-24">
+
+            <section id="hero-bg" class="rounded-2xl py-24 md:py-40 mt-16">
+                <div id="hero" class="text-center px-4">
+                    <p class="text-lg text-[var(--primary-color)] font-semibold reveal">PROJECT CASE STUDY</p>
+                    <h1 class="text-4xl md:text-6xl mt-2 mb-6 gradient-text reveal">社内規程AI Bot構築と性能最適化</h1>
+                    <p class="text-xl leading-relaxed font-normal max-w-3xl mx-auto text-[var(--text-main)] reveal">
+                        煩雑な規程検索をAIとの対話で解決。AIツールを活用し、ソースドキュメントの最適化によって応答性能を大幅に向上させたナレッジマネジメント改革。 
+                    </p>
+                </div>
+            </section>
+
+            <section id="overview" data-gsap-stagger>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-user-cog text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">実行した役割</h3>
+                        <p class="text-[var(--text-sub)]">AI活用推進 / PoCリード</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-brain text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">主要技術</h3>
+                        <p class="text-[var(--text-sub)]">AIノートツール (LLM), ドキュメントツール</p> <!-- 修正: 具体名削除 -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-chart-line text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">主要成果</h3>
+                        <p class="text-[var(--text-sub)]">応答性能の大幅向上、検索時間の大幅短縮</p> <!-- 修正: 割合削除 -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="timeline">
+                <div class="section-title text-center mb-16">
+                    <h2 class="reveal gradient-text">プロジェクトの道のり</h2>
+                </div>
+                <div class="relative max-w-4xl mx-auto px-4" data-gsap-stagger>
+                    <div class="absolute top-8 left-0 w-full h-0.5 bg-[var(--border-color)]"></div>
+                    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--secondary-color)]">
+                                    <i class="fas fa-search-minus text-2xl text-[var(--secondary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">課題</h3>
+                            <p class="text-sm text-[var(--text-sub)]">非効率・属人化した<br>ナレッジ検索</p>
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--primary-color)]">
+                                    <i class="fas fa-robot text-2xl text-[var(--primary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">行動</h3>
+                            <p class="text-sm text-[var(--text-sub)]">RAG対応ツールを活用した<br>AI BotのPoCとソース最適化</p> <!-- 修正: 具体名削除 -->
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-yellow-400">
+                                    <i class="fas fa-rocket text-2xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">成果</h3>
+                            <p class="text-sm text-[var(--text-sub)]">応答性能の大幅向上と<br>検索時間の大幅短縮</p> <!-- 修正: 割合削除 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="challenge">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">背景と直面した困難</h2></div>
+                <div class="glass-card p-8 md:p-12 reveal">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-sitemap text-2xl text-[var(--secondary-color)] mr-4"></i>Situation: 非効率なナレッジ検索プロセス</h3> <!-- 修正: 属人化・非効率化 -> 非効率な -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                                社内規程がファイルサーバー上の文書ファイルに散在し、目的の情報を見つけ出すのは困難でした。キーワード検索では意図した結果が得られにくく、担当者の知識に依存する状態は、業務のボトルネックでありコンプライアンス上のリスクも懸念されていました。 <!-- 修正: 困難でした -> 得られにくく, 内包 -> 懸念 -->
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-exclamation-triangle text-2xl text-yellow-400 mr-4"></i>Difficulty: AIツールの標準機能の限界</h3> <!-- 修正: 生成AI -> AIツール -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                               当初、AIノートツールに既存の規程ファイルをそのまま読み込ませましたが、ソースの参照漏れや応答の遅延が見られました。複数の規程を横断する複雑な質問には回答できず、プロトタイプの段階で実用に向けて改善が必要という課題に直面しました。 <!-- 修正: 頻発 -> 見られました, 程遠い -> 改善が必要 -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="solution" data-gsap-stagger>
+                <div class="section-title text-center mb-16"><h2 class="reveal-child gradient-text">検索プロセスの変革</h2></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                    <!-- Before (変更なし) -->
+                    <div class="flow-card border-red-500/30 reveal-child flex flex-col">
+                        <h3 class="text-2xl text-red-400 mb-6 text-center">BEFORE: 手作業による検索</h3>
+                        <div class="space-y-4 flex-grow flex flex-col justify-center">
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-red-400"><i class="fas fa-search"></i></div>
+                                <div><h4>キーワードで手探り検索</h4><p class="text-sm text-[var(--text-sub)]">ファイルサーバーで関連しそうな単語を試す</p></div>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                             <div class="flex items-center gap-4">
+                                <div class="flow-icon text-red-400"><i class="fas fa-file-word"></i></div>
+                                <div><h4>複数ファイルを目視確認</h4><p class="text-sm text-[var(--text-sub)]">ヒットしたファイルを開き、該当箇所を探す</p></div>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-red-400"><i class="fas fa-question-circle"></i></div>
+                                <div><h4>解釈のばらつきと属人化</h4><p class="text-sm text-[var(--text-sub)]">担当者によって回答が異なり、時間がかかる</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- After (変更なし) -->
+                    <div class="flow-card border-green-500/30 reveal-child flex flex-col">
+                        <h3 class="text-2xl text-green-400 mb-6 text-center">AFTER: AIによる対話型検索</h3>
+                        <div class="space-y-4 flex-grow flex flex-col justify-center">
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-green-400"><i class="fas fa-comments"></i></div>
+                                <div><h4>自然言語でAIに質問</h4><p class="text-sm text-[var(--text-sub)]">「〇〇な場合の申請方法は？」のように話しかける</p></div>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                             <div class="flex items-center gap-4">
+                                <div class="flow-icon text-green-400"><i class="fas fa-cogs"></i></div>
+                                <div><h4>AIが規程を横断的に解釈</h4><p class="text-sm text-[var(--text-sub)]">AIが全規程を瞬時に読み解き、要約</p></div>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-down"></i></div>
+                            <div class="flex items-center gap-4">
+                                <div class="flow-icon text-green-400"><i class="fas fa-check-circle"></i></div>
+                                <div><h4>根拠に基づいた迅速な回答</h4><p class="text-sm text-[var(--text-sub)]">ソースを明記した回答を数秒で提示</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="action">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">性能向上のプロセス</h2></div>
+                <div class="max-w-3xl mx-auto" data-gsap-stagger>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-vial"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Step 1: 初期テストと課題特定</h3><p class="text-[var(--text-sub)] font-normal">既存の規程ファイル（文書ファイル）をAIツールに直接アップロードし、ベースライン性能を測定。応答が遅く、ソース参照が不正確で、複雑な質問に回答できない等の課題を洗い出しました。</p></div> <!-- 修正: 抜け漏れ -> 参照が不正確, 定量・定性削除 -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                         <div class="timeline-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="glass-card p-8">
+                            <h3 class="text-xl mb-2">Step 2: ソースの最適化【成功の鍵】</h3>
+                            <p class="text-[var(--text-sub)] font-normal">AIの応答性能を最大化するため、ソースドキュメントの構造そのものに注目しました。既存の文書ファイルを、AIが解釈しやすい形式に変換。さらに、文書を階層構造化し、各ファイルの冒頭に関連データやタグをメタ情報として付与しました。この「データの前処理」が、性能を向上させる鍵となりました。</p> <!-- 修正: 地道な -> (削除), 飛躍的削除 -->
+                            <!-- BEFORE/AFTER 図 (変更なし) -->
+                            <div class="mt-6 border-t border-[var(--border-color)] pt-6">
+                                <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4 text-center">
+                                    <div class="p-4 rounded-lg bg-black/10 dark:bg-black/20">
+                                        <h4 class="font-semibold mb-2 text-red-400">BEFORE</h4>
+                                        <div class="flex justify-center gap-2 text-4xl text-blue-400 opacity-70">
+                                            <i class="fas fa-file-word"></i> 
+                                            <i class="fas fa-file-word"></i>
+                                            <i class="fas fa-file-word"></i>
+                                        </div>
+                                        <p class="text-xs text-[var(--text-sub)] mt-2">非構造化ファイル<br>(情報が散在)</p>
+                                    </div>
+                                    <div class="text-4xl text-[var(--primary-color)] transform md:rotate-0 rotate-90">
+                                        <i class="fas fa-long-arrow-alt-right"></i>
+                                    </div>
+                                    <div class="p-4 rounded-lg bg-black/10 dark:bg-black/20">
+                                        <h4 class="font-semibold mb-2 text-green-400">AFTER</h4>
+                                        <div class="flex justify-center text-4xl text-gray-400">
+                                             <i class="fas fa-file-alt"></i> 
+                                        </div>
+                                        <p class="text-xs text-[var(--text-sub)] mt-2">構造化データ<br>(階層化 + メタデータ)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-card reveal-child">
+                         <div class="timeline-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Step 3: 性能評価と効果測定</h3><p class="text-[var(--text-sub)] font-normal">最適化前後の比較テストを同じ質問セットで実施。その結果、応答速度と回答精度が大幅に改善。ソース参照の漏れも解消され、実用レベルの性能を確認しました。</p></div> <!-- 修正: 47%削除, 向上 -> 改善, 抜け漏れ -> 参照の漏れ, 達成 -> 確認 -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-rocket"></i></div>
+                        <div class="glass-card p-8">
+                            <h3 class="text-xl mb-2">Step 4: 展開とフィードバック</h3>
+                            <p class="text-[var(--text-sub)] font-normal">完成したAI Botを対象部署へ展開。「検索時間が劇的に減った」「これまで見つけられなかった情報にたどり着けた」といった評価を得て、ナレッジ共有の改善に貢献しました。</p> <!-- 修正: 変革を実現 -> 改善に貢献 -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="result">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">プロジェクトがもたらした価値</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-tachometer-alt text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">応答性能の大幅向上</h3> 
+                        <p class="text-4xl font-bold gradient-text my-4">改善</p> 
+                        <p class="text-[var(--text-sub)]">ソースの最適化により、AIの応答時間を短縮し、UXを大幅に改善しました。</p> <!-- 修正: 思考時間 -> 応答時間 -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-clock text-5xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">検索工数の大幅削減</h3>
+                        <p class="text-[var(--text-sub)] mt-4">誰でも短時間で必要な情報にアクセス可能となり、生産性が向上しました。</p> <!-- 修正: 数秒 -> 短時間 -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                         <i class="fas fa-shield-alt text-5xl text-blue-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">コンプライアンス強化支援</h3> <!-- 修正: 強化 -> 強化支援 -->
+                        <p class="text-[var(--text-sub)] mt-4">正確な情報へのアクセスが容易になり、解釈ミスによるリスク低減を支援しました。</p> <!-- 修正: 低減しました -> 低減を支援しました -->
+                    </div>
+                     <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-seedling text-5xl text-indigo-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">横展開可能なノウハウ</h3>
+                        <p class="text-[var(--text-sub)] mt-4">RAGの性能を引き出すソース最適化手法は、他業務のAI化にも応用可能です。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="takeaways">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">学びと再現性</h2></div>
+                <div class="grid grid-cols-1 gap-8">
+                     <div class="glass-card p-8 md:p-12 reveal">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-cogs text-2xl text-[var(--secondary-color)] mr-4"></i>RAGの性能は「ソースの質」に依存する</h3>
+                        <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                            このプロジェクトの最大の学びは、RAG（Retrieval-Augmented Generation）を用いたシステムの性能は、LLMそのものだけでなく、参照させる「ソースの質」に大きく依存するということです。「Garbage In, Garbage Out」の原則はAIにも当てはまり、AIが理解しやすいように情報を前処理・構造化することが性能最大化の鍵でした。
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-tools text-[var(--primary-color)] mr-3"></i>使用スキル</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-center"><i class="fas fa-brain mr-3 text-yellow-400"></i>AIノートツール (LLM活用)</li> 
+                                <li class="flex items-center"><i class="fas fa-file-alt mr-3 text-blue-400"></i>ドキュメントツール</li> 
+                                <li class="flex items-center"><i class="fas fa-project-diagram mr-3 text-green-400"></i>RAGアーキテクチャ理解</li> <!-- 修正: 設計 -> 理解 -->
+                                <li class="flex items-center"><i class="fas fa-pen-nib mr-3 text-indigo-400"></i>プロンプトエンジニアリング</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>再現ポイント</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>ソースを構造化する:</strong> 長文のドキュメントをQ&A形式などに変換し、AIの文脈理解を助ける。</p></li> <!-- 修正: 形式例追加 -->
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>小さく試す(PoC):</strong> RAG対応ツールで迅速にPoCを行い、仮説検証を繰り返す。</p></li> 
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>定量的に評価する:</strong> 改善前後で同じ質問セットを使い、応答速度や精度を数値で比較・評価する。</p></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center reveal">
+                 <a href="index.html" class="inline-block bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[var(--primary-color)]/20 btn-custom-text">
+                    <i class="fas fa-arrow-left mr-2"></i> ポートフォリオに戻る
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docHtml = document.documentElement;
+            
+            // --- THEME ---
+            const loader = document.getElementById('loader');
+            if (loader) { 
+                 loader.classList.add('hidden');
+            } else {
+                console.error("Loader element not found!"); 
+            }
+            
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleIcon = themeToggle.querySelector('i');
+            
+            function applyTheme() {
+                const isDark = docHtml.classList.contains('dark');
+                toggleIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                docHtml.classList.toggle('dark');
+                localStorage.setItem('theme', docHtml.classList.contains('dark') ? 'dark' : 'light');
+                applyTheme();
+            });
+
+            // Initial theme application
+            applyTheme();
+            
+            // GSAP Animations
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('[data-gsap-stagger]').forEach(container => {
+                const targets = container.querySelectorAll('.reveal-child');
+                gsap.fromTo(targets, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: container, start: 'top 85%' }
+                });
+            });
+            gsap.utils.toArray('.reveal').forEach(elem => {
+                gsap.fromTo(elem, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+                    scrollTrigger: { trigger: elem, start: 'top 90%' }
+                });
+            });
+            // Counter animation removed
+            
+            // Section Navigation Active State
+            const sections = gsap.utils.toArray('main section');
+            const navLinks = gsap.utils.toArray('.section-nav a');
+            sections.forEach(section => {
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: 'top center',
+                    end: 'bottom center',
+                    onToggle: self => {
+                        const navLink = document.querySelector(`.section-nav a[href="#${section.id}"]`);
+                        if (navLink) {
+                            if (self.isActive) {
+                                navLinks.forEach(link => link.classList.remove('active'));
+                                navLink.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

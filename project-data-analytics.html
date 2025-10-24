@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事例紹介 - 調達ダッシュボード構築</title>
+
+    <!-- SEO & OGP -->
+    <meta name="description" content="既存のデータベースを活用し、データに基づく意思決定文化を醸成。チームの大規模なコスト削減に貢献したダッシュボード構築事例。"> <!-- 修正: 属人化 -> 既存の -->
+    <meta property="og:title" content="事例紹介 - 調達ダッシュボード構築">
+    <meta property="og:description" content="調達業務を「経験と勘」から「データに基づく意思決定」へと変革し、チームの大規模なコスト削減に貢献したプロジェクト。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://kou511.github.io/my-portfolio/project-data-analytics.html">
+    <meta property="og:image" content="https://kou511.github.io/my-portfolio/images/dashboard.webp">
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.webp">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Flicker-Fix Script (Default to Dark Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark
+        }
+    </script>
+
+    <!-- Fonts, CSS, Icons -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP & Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            /* Light Mode Theme */
+            --primary-color: #03887B;      /* Deep Mint Green */
+            --secondary-color: #6F2DA8;   /* Deep Purple */
+            --bg-main: #FAFAFA;           /* Bright off-white */
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border-color: #e5e5e5;      /* Neutral-200 */
+            --text-main: #212121;         /* Deep black */
+            --text-sub: #737373;          /* Neutral-500 */
+            --shadow-color: rgba(0,0,0,0.07);
+            --dynamic-grad-opacity: 0.05;
+            --btn-text-color: #FAFAFA;
+            --accent-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        html.dark {
+            /* Dark Mode Theme */
+            --primary-color: #00CBAA;      /* Emerald Green */
+            --secondary-color: #9D4EDD;   /* Vibrant Violet */
+            --bg-main: #171717;           /* Near-black gray */
+            --bg-card: rgba(39, 39, 39, 0.6); /* Translucent #272727 */
+            --border-color: rgba(0, 203, 170, 0.2); /* Translucent primary */
+            --text-main: #F3F3F3;         /* Pure white */
+            --text-sub: #a1a1aa;          /* Mid-gray */
+            --shadow-color: rgba(0,0,0,0.5);
+            --dynamic-grad-opacity: 0.07;
+            --btn-text-color: #171717;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.4s, color 0.4s;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, var(--primary-color), transparent 40%),
+                        radial-gradient(circle at 85% 30%, var(--secondary-color), transparent 40%),
+                        radial-gradient(circle at 50% 90%, #3a2d80, transparent 50%);
+            background-color: var(--bg-main); opacity: var(--dynamic-grad-opacity); z-index: -1;
+            animation: gradient-flow 20s ease-in-out infinite;
+            transition: opacity 0.4s;
+        }
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+            50% { background-position: 100% 50%, 100% 50%, 100% 50%; }
+        }
+
+        .glass-card {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: url('images/dashboard.webp'); background-repeat: repeat; opacity: 0.025; }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: rgba(0, 203, 170, 0.5);
+        }
+
+        #loader {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-main); color: var(--primary-color);
+            font-size: 2rem; font-weight: bold;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+
+        .controls-container {
+            position: fixed; 
+            top: 1.5rem; right: 1.5rem; 
+            z-index: 51;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #theme-toggle {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; 
+        }
+        #theme-toggle i { color: var(--text-sub); transition: color 0.3s, transform 0.3s; }
+        #theme-toggle:hover i { color: var(--primary-color); transform: rotate(15deg); }
+        
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+
+        #hero-bg {
+            background-image: url('images/dashboard.webp');
+            background-size: cover; background-position: center; position: relative;
+        }
+        #hero-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(23, 23, 23, 0.9) 0%, rgba(23, 23, 23, 0.7) 100%);
+            z-index: 1;
+        }
+        html:not(.dark) #hero-bg::before {
+             background: linear-gradient(180deg, rgba(250, 250, 250, 0.9) 0%, rgba(250, 250, 250, 0.7) 100%);
+        }
+        #hero-bg > * { position: relative; z-index: 2; }
+
+        .timeline-card { 
+            position: relative; padding-left: 4rem; padding-bottom: 2.5rem;
+        }
+        .timeline-card:last-child { padding-bottom: 0; }
+        .timeline-card::before {
+            content: ''; position: absolute; left: 28px; top: 0.5rem;
+            width: 2px; height: 100%; background: var(--border-color); 
+        }
+        .timeline-card:last-child::before { display: none; }
+        
+        .timeline-icon {
+            position: absolute; left: 0; top: 0; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--btn-text-color); background: var(--primary-color);
+            border: 2px solid var(--border-color); z-index: 1; transition: all 0.3s;
+        }
+
+        .section-nav {
+            position: fixed; top: 50%; left: 2rem; transform: translateY(-50%);
+            z-index: 50; display: none;
+        }
+        @media (min-width: 1280px) { .section-nav { display: block; } }
+        .section-nav ul { list-style: none; padding: 0; margin: 0; }
+        .section-nav a {
+            display: flex; align-items: center;
+            padding: 0.5rem 0; color: var(--text-sub);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            position: relative; transition: color 0.3s;
+        }
+        .section-nav a::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background-color: var(--text-sub); border-radius: 50%;
+            margin-right: 1rem; transition: all 0.3s;
+        }
+        .section-nav a.active, .section-nav a:hover { color: var(--primary-color); }
+        .section-nav a.active::before, .section-nav a:hover::before {
+            background-color: var(--primary-color);
+            transform: scale(1.5);
+        }
+
+        .reveal { opacity: 0; transform: translateY(50px); }
+        
+        .timeline-icon-wrapper {
+            position: relative; z-index: 1;
+        }
+        .timeline-icon-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border-width: 2px; margin: 0 auto;
+            background-color: var(--bg-main);
+            transition: all 0.4s ease-in-out;
+        }
+        .reveal-child:hover .timeline-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .btn-custom-text {
+            color: var(--btn-text-color);
+        }
+
+        /* Dashboard styles */
+        .dashboard-filter-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-sub);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dashboard-filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .dashboard-filter-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--btn-text-color);
+            font-weight: 700;
+        }
+        .kpi-card {
+            background: rgba(0,0,0,0.1);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">Loading...</div>
+    <div class="controls-container">
+        <a href="project-data-analytics_en.html" class="text-[var(--text-sub)] hover:text-[var(--primary-color)] transition-colors font-bold text-lg" aria-label="Switch to English">EN</a>
+        <button id="theme-toggle" aria-label="テーマを切り替える"><i class="fas fa-sun"></i></button>
+    </div>
+
+    <header class="fixed top-0 left-0 z-50 p-6">
+        <a href="index.html" class="glass-card inline-block px-4 py-2 text-sm hover:!border-[var(--primary-color)] transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>ポートフォリオに戻る
+        </a>
+    </header>
+
+    <nav class="section-nav">
+        <ul>
+            <li><a href="#overview" class="active">概要</a></li>
+            <li><a href="#timeline">道のり</a></li>
+            <li><a href="#challenge">課題</a></li>
+            <li><a href="#action">プロセス</a></li>
+            <li><a href="#deliverable">成果物</a></li>
+            <li><a href="#result">成果</a></li>
+            <li><a href="#takeaways">学び</a></li>
+        </ul>
+    </nav>
+
+    <div class="flex">
+        <main class="w-full max-w-screen-lg mx-auto p-4 md:p-12 space-y-24">
+
+            <section id="hero-bg" class="rounded-2xl py-24 md:py-40 mt-16">
+                <div id="hero" class="text-center px-4">
+                    <p class="text-lg text-[var(--primary-color)] font-semibold reveal">PROJECT CASE STUDY</p>
+                    <h1 class="text-4xl md:text-6xl mt-2 mb-6 gradient-text reveal">データドリブン調達ダッシュボード構築</h1>
+                    <p class="text-xl leading-relaxed font-normal max-w-3xl mx-auto text-[var(--text-main)] reveal">
+                        既存のデータベースを活用し、データアクセスを改善。<br>調達業務を「経験と勘」から「データに基づく意思決定」へと変革し、<br>チームの大規模なコスト削減に貢献。 <!-- 修正: 属人化 -> 既存の, 民主化 -> データアクセスを改善 -->
+                    </p>
+                </div>
+            </section>
+
+            <section id="overview" data-gsap-stagger>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-user text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">私たちの役割</h3>
+                        <p class="text-[var(--text-sub)]">調達担当 / データ分析</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-chart-bar text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">主要ツール</h3>
+                        <p class="text-[var(--text-sub)]">BIツール / データベース / 表計算ソフト</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-bullseye text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">目的</h3>
+                        <p class="text-[var(--text-sub)]">調達業務の可視化とコスト削減</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="timeline">
+                <div class="section-title text-center mb-16">
+                    <h2 class="reveal gradient-text">プロジェクトの道のり</h2>
+                </div>
+                <div class="relative max-w-4xl mx-auto px-4" data-gsap-stagger>
+                    <div class="absolute top-8 left-0 w-full h-0.5 bg-[var(--border-color)]"></div>
+                    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--secondary-color)]">
+                                    <i class="fas fa-lock text-2xl text-[var(--secondary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">課題</h3>
+                            <p class="text-sm text-[var(--text-sub)]">限定的なデータアクセスと<br>既存手法への固執</p> <!-- 修正: 属人化DB -> 限定的なデータアクセス, 現場の抵抗 -> 既存手法への固執 -->
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--primary-color)]">
+                                    <i class="fas fa-tachometer-alt text-2xl text-[var(--primary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">行動</h3>
+                            <p class="text-sm text-[var(--text-sub)]">データ連携と<br>ダッシュボード開発</p>
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-yellow-400">
+                                    <i class="fas fa-lightbulb text-2xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">成果</h3>
+                            <p class="text-sm text-[var(--text-sub)]">データに基づく<br>意思決定文化の醸成</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="challenge">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">背景と直面した困難</h2></div>
+                <div class="glass-card p-8 md:p-12 reveal">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-database text-2xl text-[var(--secondary-color)] mr-4"></i>Situation: データアクセスの制限</h3> <!-- 修正: 属人化データベース -> データアクセスの制限 -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                                プロジェクト開始前、調達データは特定のスキルを持つ担当者のみがアクセス・操作できるデータベースに格納されていました。そのため、多くの担当者は自分の担当部材の「価格推移」や「購入量」を迅速に分析できず、データに基づいた戦略的な意思決定がしにくい状況でした。 <!-- 修正: 属人化 -> 特定のスキルを持つ担当者のみがアクセス・操作できる, 困難 -> しにくい -->
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-exclamation-triangle text-2xl text-yellow-400 mr-4"></i>Difficulty: データ品質と変化への懸念</h3> <!-- 修正: 信頼性と現場の抵抗 -> データ品質と変化への懸念 -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                               当初の課題は、長年の運用で複雑化したデータベース構造を理解し、分析に必要な品質のデータを抽出することでした。また、一部の担当者からは「数字だけでは現場の状況は分からない」という、新しい手法への懸念の声もあり、データ活用の利点を丁寧に説明する必要がありました。 <!-- 修正: 解読 -> 理解, 信頼性 -> 品質, 抵抗 -> 変化への懸念, 懐疑的 -> 懸念, 意識改革 -> データ活用の利点を丁寧に説明する -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="action">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">チームでの課題解決プロセス</h2></div>
+                <div class="max-w-3xl mx-auto" data-gsap-stagger>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-tasks"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">要件定義とデータ連携</h3><p class="text-[var(--text-sub)] font-normal">まず、調達部門のメンバーにヒアリングを行い、彼らが日々どのような情報を基に意思決定を下しているのか、どのような指標（KPI）を可視化したいのかを洗い出しました。その上で、既存データベースからBIツールへデータを自動連携する仕組みを構築しました。</p></div>
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-drafting-compass"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">ダッシュボードの設計と開発</h3><p class="text-[var(--text-sub)] font-normal">収集したデータを基に、BIツールを用いてインタラクティブなダッシュボードのプロトタイプを開発。品目別・サプライヤー別の支出分析、価格変動の推移、納期遵守率など、重要なKPIが一目でわかるように設計し、チームでレビューを重ねながら改善していきました。</p></div>
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-search-dollar"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">インサイトの発見と共有</h3><p class="text-[var(--text-sub)] font-normal">ダッシュボードは、これまで見過ごされがちだった傾向を明らかにしました。例えば、ある担当製品の中で、長期間にわたり単価が見直されていないにもかかわらず購入量が年々増加している部材を発見。これは、データがアクセスしやすくなったからこそ得られた、コスト削減の機会でした。</p></div> <!-- 修正: 誰も気づかなかった -> 見過ごされがちだった, 民主化された -> アクセスしやすくなった, 大きな機会 -> 機会 -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-users"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">データに基づくアクションと文化の醸成</h3><p class="text-[var(--text-sub)] font-normal">この発見を基に、チームメンバーと協力し、サプライヤーとの価格交渉に臨み、コスト削減を実現しました。この成功体験により、「データは交渉材料になる」という認識がチーム全体に広がり、データを見て考える文化が醸成されるきっかけとなりました。</p></div> <!-- 修正: 先輩や上司の助けも借りながら -> チームメンバーと協力し, 困難な -> (削除), 大幅な -> (削除), 武器 -> 交渉材料 -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="deliverable" class="reveal">
+                <div class="section-title text-center mb-12">
+                    <h2 class="gradient-text">成果物デモ: インタラクティブ調達ダッシュボード</h2>
+                </div>
+                <div class="glass-card p-4 sm:p-6 md:p-8">
+                    <!-- Filters -->
+                    <div class="flex flex-col gap-4 mb-6">
+                        <div id="dashboard-group-filters" class="flex flex-wrap items-center gap-2">
+                            <span class="font-semibold text-sm mr-2 text-[var(--text-sub)]">グループ:</span>
+                            <button class="dashboard-filter-btn active" data-filter="All">すべて</button>
+                            <button class="dashboard-filter-btn" data-filter="Group 1">グループ 1</button>
+                            <button class="dashboard-filter-btn" data-filter="Group 2">グループ 2</button>
+                        </div>
+                        <div id="dashboard-product-filters" class="flex flex-wrap items-center gap-2">
+                            <span class="font-semibold text-sm mr-2 text-[var(--text-sub)]">製品:</span>
+                            <button class="dashboard-filter-btn" data-filter="Product A">製品 A</button>
+                            <button class="dashboard-filter-btn" data-filter="Product B">製品 B</button>
+                            <button class="dashboard-filter-btn" data-filter="Product C">製品 C</button>
+                        </div>
+                    </div>
+            
+                    <!-- KPIs -->
+                    <div id="kpi-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <!-- KPI cards will be generated by JS -->
+                    </div>
+            
+                    <!-- Charts & Memo -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <canvas id="demand-chart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div id="donut-chart-container" class="flex flex-col items-center justify-center">
+                                <h3 id="donut-title" class="text-lg font-semibold mb-2 text-center"></h3>
+                                <canvas id="group-donut-chart" class="max-h-64"></canvas>
+                            </div>
+                            <div id="supplier-memo-container" class="hidden">
+                                 <h3 class="text-lg font-semibold mb-2">取引先メモ</h3>
+                                 <div id="supplier-memo-content" class="glass-card p-4 text-sm h-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="result">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">プロジェクトがもたらした価値</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="md:col-span-2 glass-card p-8 text-center reveal-child">
+                         <i class="fas fa-yen-sign text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">チームのコスト削減目標達成に貢献</h3>
+                        <p class="text-4xl font-bold gradient-text my-4">目標達成</p>
+                        <p class="text-[var(--text-sub)]">ダッシュボードによるインサイトが価格交渉の材料となり、チーム全体の目標達成に貢献しました。(金額詳細は非公開)</p> <!-- 修正: 強力な武器 -> 材料, 大きく貢献 -> 貢献 -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-eye text-5xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">データアクセスの改善と透明化</h3> <!-- 修正: 業務の民主化 -> データアクセスの改善 -->
+                        <p class="text-[var(--text-sub)] mt-4">誰でも直感的にデータへアクセスできるようになり、情報共有が促進されました。チーム全体の分析に対する意識も向上しました。</p> <!-- 修正: 属人化解消 -> 情報共有促進, 能力底上げ -> 意識向上 -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-brain text-5xl text-[var(--secondary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">データドリブン文化の醸成</h3>
+                        <p class="text-[var(--text-sub)] mt-4">具体的な成功体験を通じて、「勘」だけでなく「データ」も活用して判断する文化がチームに根付き始めました。</p> <!-- 修正: ではなく -> だけでなく, で語る -> も活用して判断する -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="takeaways">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">学びと再現性</h2></div>
+                <div class="grid grid-cols-1 gap-8">
+                     <div class="glass-card p-8 md:p-12 reveal">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-lightbulb text-2xl text-[var(--secondary-color)] mr-4"></i>データは「翻訳」してこそ価値を生む</h3>
+                        <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                            当初の懸念の声に直面し、ただデータを可視化するだけでは不十分だと痛感しました。しかし、データから「長期間価格が見直されていない」という具体的な傾向を発見し、それをアクションに繋げた成功体験が、チームの意識を変えました。データ分析とは、数字の裏にある状況を読み解き、関係者が納得できる「根拠」として提示することだと学びました。 <!-- 修正: 現場の抵抗感 -> 当初の懸念の声, 物語 -> 傾向, 物語として翻訳 -> 根拠として提示 -->
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-tools text-[var(--primary-color)] mr-3"></i>使用スキル</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-center"><i class="fas fa-chart-bar mr-3 text-blue-400"></i>BIツール</li>
+                                <li class="flex items-center"><i class="fas fa-database mr-3 text-indigo-400"></i>データベース (SQL含む)</li>
+                                <li class="flex items-center"><i class="fas fa-file-excel mr-3 text-green-400"></i>表計算ソフト (高度な関数)</li>
+                                <li class="flex items-center"><i class="fas fa-users mr-3 text-yellow-400"></i>ステークホルダー・マネジメント</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>再現ポイント</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>スモールスタート:</strong> まずは一つの具体的な課題解決に集中し、成功体験を創出する。</p></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>現場を巻き込む:</strong> 現場担当者の日々の疑問や課題をヒアリングし、ダッシュボードに反映させる。</p></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>インサイトを共有:</strong> データから得られた発見を積極的に共有し、データ活用の価値をチームに体感してもらう。</p></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center reveal">
+                 <a href="index.html" class="inline-block bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[var(--primary-color)]/20 btn-custom-text">
+                    <i class="fas fa-arrow-left mr-2"></i> ポートフォリオに戻る
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docHtml = document.documentElement;
+            
+            // --- THEME ---
+            window.onload = () => { document.getElementById('loader').classList.add('hidden'); };
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleIcon = themeToggle.querySelector('i');
+            
+            function applyTheme() {
+                const isDark = docHtml.classList.contains('dark');
+                toggleIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+                // Trigger chart redraw on theme change
+                if (window.dashboard && window.dashboard.mainChart) {
+                    window.dashboard.updateDashboard(window.dashboard.currentFilter);
+                }
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                docHtml.classList.toggle('dark');
+                localStorage.setItem('theme', docHtml.classList.contains('dark') ? 'dark' : 'light');
+                applyTheme();
+            });
+
+            // Initial theme application (default dark)
+            if (localStorage.getItem('theme') === 'light') {
+                docHtml.classList.remove('dark');
+            } else {
+                 docHtml.classList.add('dark');
+            }
+            applyTheme();
+            
+            // --- GSAP ANIMATIONS ---
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('[data-gsap-stagger]').forEach(container => {
+                const targets = container.querySelectorAll('.reveal-child');
+                gsap.fromTo(targets, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: container, start: 'top 85%', toggleActions: 'play none none none' }
+                });
+            });
+            gsap.utils.toArray('.reveal').forEach(elem => {
+                gsap.fromTo(elem, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+                    scrollTrigger: { trigger: elem, start: 'top 90%', toggleActions: 'play none none none' }
+                });
+            });
+            // Removed counter animation for the large number
+            
+            // --- SECTION NAVIGATION ---
+            const sections = gsap.utils.toArray('main section');
+            const navLinks = gsap.utils.toArray('.section-nav a');
+            sections.forEach(section => {
+                ScrollTrigger.create({
+                    trigger: section, start: 'top center', end: 'bottom center',
+                    onToggle: self => {
+                        const navLink = document.querySelector(`.section-nav a[href="#${section.id}"]`);
+                        if (navLink) {
+                            if (self.isActive) {
+                                navLinks.forEach(link => link.classList.remove('active'));
+                                navLink.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // --- INTERACTIVE DASHBOARD ---
+            const dashboardModule = () => {
+                let mainChart, donutChart;
+                let currentFilter = 'All';
+
+                const products = {
+                    'Product A': { group: 'Group 1', data: generateData(100, 0.02, 50, 0.01) },
+                    'Product B': { group: 'Group 1', data: generateData(150, 0.01, 70, 0.005) },
+                    'Product C': { group: 'Group 2', data: generateData(80, -0.01, 120, -0.005) }
+                };
+                
+                const supplierMemos = {
+                    'Product A': '主要サプライヤーはAlpha社。長期契約による価格安定。来年度の契約更新に向けて交渉準備中。',
+                    'Product B': 'サプライヤーがBeta社とGamma社の2社体制。Beta社の納期遅延が散見されるため、Gamma社への発注比率増加を検討。',
+                    'Product C': 'Delta社からの独占供給。地政学的リスクを考慮し、代替サプライヤーの調査を開始する必要あり。'
+                };
+
+                const labels = Array.from({ length: 18 }, (_, i) => {
+                    const month = (i % 12) + 1;
+                    const year = 2024 + Math.floor(i / 12);
+                    return `${year}-${String(month).padStart(2, '0')}`;
+                });
+
+                function generateData(baseDemand, demandTrend, basePrice, priceTrend) {
+                    const data = [];
+                    for (let i = 0; i < 18; i++) {
+                        const seasonality = Math.sin((i / 12) * 2 * Math.PI) * 0.2 + 1;
+                        const demand = baseDemand * (1 + demandTrend * i) * seasonality * (1 + (Math.random() - 0.5) * 0.1);
+                        const price = basePrice * (1 + priceTrend * i) * (1 - seasonality * 0.05) * (1 + (Math.random() - 0.5) * 0.05);
+                        data.push({
+                            demand: i < 12 ? Math.round(demand) : null,
+                            predictedDemand: i >= 11 ? Math.round(demand) : null,
+                            price: i < 12 ? parseFloat(price.toFixed(2)) : null,
+                            predictedPrice: i >= 11 ? parseFloat(price.toFixed(2)) : null,
+                        });
+                    }
+                    return data;
+                }
+                
+                function getFilteredData(filter) {
+                    const productKeys = Object.keys(products);
+                    let keysToSum = [];
+                    if (filter === 'All') keysToSum = productKeys;
+                    else if (filter.startsWith('Group')) keysToSum = productKeys.filter(k => products[k].group === filter);
+                    else keysToSum = [filter];
+
+                    const aggregatedData = labels.map((_, i) => {
+                        return keysToSum.reduce((acc, key) => {
+                            const productData = products[key].data[i];
+                            acc.demand += productData.demand || 0;
+                            acc.predictedDemand += productData.predictedDemand || 0;
+                            // Calculate weighted average price based on demand
+                            const currentDemand = productData.demand || 0;
+                            const currentPrice = productData.price || 0;
+                            acc.totalSpending += currentDemand * currentPrice;
+                            acc.totalDemand += currentDemand;
+
+                            const predDemand = productData.predictedDemand || 0;
+                            const predPrice = productData.predictedPrice || 0;
+                            acc.totalPredSpending += predDemand * predPrice;
+                            acc.totalPredDemand += predDemand;
+
+                            return acc;
+                        }, { demand: 0, predictedDemand: 0, totalSpending: 0, totalDemand: 0, totalPredSpending: 0, totalPredDemand: 0 });
+                    });
+                    
+                    // Final calculation of average price
+                    aggregatedData.forEach(d => {
+                        d.price = d.totalDemand > 0 ? d.totalSpending / d.totalDemand : 0;
+                        d.predictedPrice = d.totalPredDemand > 0 ? d.totalPredSpending / d.totalPredDemand : 0;
+                    });
+
+                    return { keys: keysToSum, data: aggregatedData };
+                }
+
+
+                function updateKPIs(filteredData) {
+                    const kpiContainer = document.getElementById('kpi-container');
+                    const actuals = filteredData.data.filter(d => d.demand !== null);
+                    const preds = filteredData.data.filter(d => d.predictedDemand !== null);
+
+                    const totalDemand = actuals.reduce((sum, d) => sum + d.demand, 0);
+                    // Use the calculated average price
+                    const totalSpending = actuals.reduce((sum,d) => sum + d.totalSpending, 0);
+                    const avgPrice = totalDemand > 0 ? totalSpending / totalDemand : 0; 
+                    const predictedTotalDemand = preds.reduce((sum, d) => sum + d.predictedDemand, 0);
+                    const nextMonthForecast = preds.length > 0 ? preds[0].predictedDemand : 0; // First prediction is next month
+
+                    const kpis = [
+                        { label: '総需要量 (実績)', value: totalDemand.toLocaleString(), icon: 'fa-cubes' },
+                        { label: '平均単価 (実績)', value: `¥${avgPrice.toFixed(2)}`, icon: 'fa-yen-sign' },
+                        { label: '総需要量 (予測)', value: predictedTotalDemand.toLocaleString(), icon: 'fa-chart-line' },
+                        { label: '来月需要予測', value: nextMonthForecast.toLocaleString(), icon: 'fa-calendar-alt' },
+                    ];
+
+                    kpiContainer.innerHTML = kpis.map(kpi => `
+                        <div class="kpi-card reveal-child">
+                            <p class="text-sm text-[var(--text-sub)]">${kpi.label}</p>
+                            <p class="text-2xl font-bold mt-1">${kpi.value}</p>
+                        </div>
+                    `).join('');
+                     // Re-run animation for newly added elements if needed
+                    gsap.utils.toArray('#kpi-container .reveal-child').forEach(elem => {
+                       gsap.fromTo(elem, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.1 });
+                    });
+                }
+
+                function updateMainChart(filteredData) {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const textColor = isDark ? '#a1a1aa' : '#737373';
+                    const gridColor = isDark ? 'rgba(0, 203, 170, 0.1)' : 'rgba(0,0,0,0.05)';
+                    
+                    // Use the calculated average price
+                    const demandData = filteredData.data.map(d => d.demand);
+                    const predDemandData = filteredData.data.map(d => d.predictedDemand);
+                    const priceData = filteredData.data.map(d => d.price ? d.price.toFixed(2) : null);
+                    const predPriceData = filteredData.data.map(d => d.predictedPrice ? d.predictedPrice.toFixed(2) : null);
+
+                    const chartConfig = {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                { type: 'line', label: '平均単価 (実績)', data: priceData, yAxisID: 'y1', borderColor: isDark ? '#F97316' : '#EA580C', tension: 0.3, pointRadius: 2, borderWidth: 2, spanGaps: true },
+                                { type: 'line', label: '市場単価 (予測)', data: predPriceData, yAxisID: 'y1', borderColor: isDark ? '#F97316' : '#EA580C', borderDash: [5, 5], tension: 0.3, pointRadius: 2, borderWidth: 2, spanGaps: true },
+                                { type: 'bar', label: '需要量 (実績)', data: demandData, yAxisID: 'y', backgroundColor: isDark ? 'rgba(0, 203, 170, 0.6)' : 'rgba(3, 136, 123, 0.6)'},
+                                { type: 'bar', label: '需要量 (予測)', data: predDemandData, yAxisID: 'y', backgroundColor: isDark ? 'rgba(0, 203, 170, 0.3)' : 'rgba(3, 136, 123, 0.3)'},
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            interaction: { mode: 'index', intersect: false },
+                            scales: {
+                                y: { position: 'left', title: { display: true, text: '需要量', color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } },
+                                y1: { position: 'right', title: { display: true, text: '平均単価 (円)', color: textColor }, ticks: { color: textColor }, grid: { drawOnChartArea: false } },
+                                x: { ticks: { color: textColor }, grid: { display: false } }
+                            },
+                            plugins: {
+                                legend: { labels: { color: textColor } },
+                                tooltip: { titleColor: isDark ? '#F3F3F3' : '#212121', bodyColor: isDark ? '#F3F3F3' : '#212121', backgroundColor: isDark ? '#171717' : '#FAFAFA' }
+                            }
+                        }
+                    };
+
+                    if (mainChart) {
+                        mainChart.data = chartConfig.data;
+                        mainChart.options = chartConfig.options;
+                        mainChart.update();
+                    } else {
+                        mainChart = new Chart(document.getElementById('demand-chart'), chartConfig);
+                    }
+                }
+                
+                function updateDonutChart(filter) {
+                    const donutContainer = document.getElementById('donut-chart-container');
+                    const donutTitle = document.getElementById('donut-title');
+                    
+                    // Only show donut for Group 1 or its products, or All
+                    if (filter !== 'All' && !filter.startsWith('Group 1') && filter !== 'Product A' && filter !== 'Product B') {
+                         donutContainer.style.display = 'none';
+                         return; // Hide if not relevant
+                    }
+
+                    donutTitle.textContent = 'グループ1 内訳 (実績需要量)';
+                    const a_demand = products['Product A'].data.reduce((sum, d) => sum + (d.demand || 0), 0);
+                    const b_demand = products['Product B'].data.reduce((sum, d) => sum + (d.demand || 0), 0);
+                    
+                    donutContainer.style.display = 'flex'; // Ensure it's visible
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const donutConfig = {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['製品 A', '製品 B'],
+                            datasets: [{ data: [a_demand, b_demand], backgroundColor: [isDark ? '#00CBAA' : '#03887B', isDark ? '#9D4EDD' : '#6F2DA8'], borderWidth: 0 }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            cutout: '60%',
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: isDark ? '#a1a1aa' : '#737373' } }
+                            }
+                        }
+                    };
+                    
+                    if(donutChart) {
+                       donutChart.data = donutConfig.data;
+                       donutChart.options = donutConfig.options;
+                       donutChart.update();
+                    } else {
+                        donutChart = new Chart(document.getElementById('group-donut-chart'), donutConfig);
+                    }
+                }
+                
+                function updateSupplierMemo(filter) {
+                    const memoContainer = document.getElementById('supplier-memo-container');
+                    const memoContent = document.getElementById('supplier-memo-content');
+                    if (supplierMemos[filter]) {
+                        memoContainer.classList.remove('hidden');
+                        memoContent.innerHTML = `<p>${supplierMemos[filter]}</p>`;
+                    } else {
+                        memoContainer.classList.add('hidden');
+                    }
+                }
+
+                function updateDashboard(filter) {
+                    currentFilter = filter;
+                    const filteredData = getFilteredData(filter);
+                    updateKPIs(filteredData);
+                    updateMainChart(filteredData);
+                    updateDonutChart(filter);
+                    updateSupplierMemo(filter);
+                }
+
+                function init() {
+                    document.querySelectorAll('.dashboard-filter-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const newFilter = e.target.dataset.filter;
+                            // Ensure only one filter group is active visually
+                            if (newFilter.startsWith('Group') || newFilter === 'All') {
+                                document.querySelectorAll('#dashboard-product-filters .dashboard-filter-btn.active').forEach(b => b.classList.remove('active'));
+                            } else { // Product filter clicked
+                                document.querySelectorAll('#dashboard-group-filters .dashboard-filter-btn.active').forEach(b => b.classList.remove('active'));
+                            }
+                            
+                            // Deactivate all buttons first, then activate the clicked one
+                            document.querySelectorAll('.dashboard-filter-btn').forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                            
+                            updateDashboard(newFilter);
+                        });
+                    });
+                     // Initialize with 'All' filter
+                    document.querySelector('#dashboard-group-filters .dashboard-filter-btn[data-filter="All"]').classList.add('active');
+                    updateDashboard('All');
+                }
+                
+                init();
+
+                // Expose update function for theme changes
+                return { updateDashboard, mainChart, donutChart, currentFilter }; 
+            };
+            
+            // Make dashboard module globally accessible for theme updates
+            window.dashboard = dashboardModule();
+        });
+    </script>
+</body>
+</html>

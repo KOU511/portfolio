@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study - Data-Driven Procurement Dashboard</title>
+
+    <!-- SEO & OGP -->
+    <meta name="description" content="A case study on building a dashboard that utilized an existing database, fostered a data-driven decision-making culture, and contributed to large-scale cost savings for the team."> <!-- Revised: democratized a siloed -> utilized an existing -->
+    <meta property="og:title" content="Case Study - Data-Driven Procurement Dashboard">
+    <meta property="og:description" content="A project that transformed procurement from 'experience and intuition' to 'data-driven decision-making,' contributing to large-scale cost savings for the team.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://kou511.github.io/my-portfolio/project-data-analytics_en.html">
+    <meta property="og:image" content="https://kou511.github.io/my-portfolio/images/dashboard.webp">
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.webp">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Flicker-Fix Script (Default to Dark Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark
+        }
+    </script>
+
+    <!-- Fonts, CSS, Icons -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"> <!-- Removed Japanese font -->
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP & Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            /* Light Mode Theme */
+            --primary-color: #03887B;      /* Deep Mint Green */
+            --secondary-color: #6F2DA8;   /* Deep Purple */
+            --bg-main: #FAFAFA;           /* Bright off-white */
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border-color: #e5e5e5;      /* Neutral-200 */
+            --text-main: #212121;         /* Deep black */
+            --text-sub: #737373;          /* Neutral-500 */
+            --shadow-color: rgba(0,0,0,0.07);
+            --dynamic-grad-opacity: 0.05;
+            --btn-text-color: #FAFAFA;
+            --accent-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        html.dark {
+            /* Dark Mode Theme */
+            --primary-color: #00CBAA;      /* Emerald Green */
+            --secondary-color: #9D4EDD;   /* Vibrant Violet */
+            --bg-main: #171717;           /* Near-black gray */
+            --bg-card: rgba(39, 39, 39, 0.6); /* Translucent #272727 */
+            --border-color: rgba(0, 203, 170, 0.2); /* Translucent primary */
+            --text-main: #F3F3F3;         /* Pure white */
+            --text-sub: #a1a1aa;          /* Mid-gray */
+            --shadow-color: rgba(0,0,0,0.5);
+            --dynamic-grad-opacity: 0.07;
+            --btn-text-color: #171717;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', sans-serif; /* Use Poppins as primary */
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.4s, color 0.4s;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, var(--primary-color), transparent 40%),
+                        radial-gradient(circle at 85% 30%, var(--secondary-color), transparent 40%),
+                        radial-gradient(circle at 50% 90%, #3a2d80, transparent 50%);
+            background-color: var(--bg-main); opacity: var(--dynamic-grad-opacity); z-index: -1;
+            animation: gradient-flow 20s ease-in-out infinite;
+            transition: opacity 0.4s;
+        }
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+            50% { background-position: 100% 50%, 100% 50%, 100% 50%; }
+        }
+
+        .glass-card {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: url("images/dashboard.webp"); background-repeat: repeat; opacity: 0.025; }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: rgba(0, 203, 170, 0.5);
+        }
+
+        #loader {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-main); color: var(--primary-color);
+            font-size: 2rem; font-weight: bold;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        
+        .controls-container {
+            position: fixed; 
+            top: 1.5rem; right: 1.5rem; 
+            z-index: 51;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #theme-toggle {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; 
+        }
+        #theme-toggle i { color: var(--text-sub); transition: color 0.3s, transform 0.3s; }
+        #theme-toggle:hover i { color: var(--primary-color); transform: rotate(15deg); }
+        
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+
+        #hero-bg {
+            background-image: url('images/dashboard.webp');
+            background-size: cover; background-position: center; position: relative;
+        }
+        #hero-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(23, 23, 23, 0.9) 0%, rgba(23, 23, 23, 0.7) 100%);
+            z-index: 1;
+        }
+        html:not(.dark) #hero-bg::before {
+             background: linear-gradient(180deg, rgba(250, 250, 250, 0.9) 0%, rgba(250, 250, 250, 0.7) 100%);
+        }
+        #hero-bg > * { position: relative; z-index: 2; }
+
+        .timeline-card { 
+            position: relative; padding-left: 4rem; padding-bottom: 2.5rem;
+        }
+        .timeline-card:last-child { padding-bottom: 0; }
+        .timeline-card::before {
+            content: ''; position: absolute; left: 28px; top: 0.5rem;
+            width: 2px; height: 100%; background: var(--border-color); 
+        }
+        .timeline-card:last-child::before { display: none; }
+        
+        .timeline-icon {
+            position: absolute; left: 0; top: 0; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--btn-text-color); background: var(--primary-color);
+            border: 2px solid var(--border-color); z-index: 1; transition: all 0.3s;
+        }
+
+        .section-nav {
+            position: fixed; top: 50%; left: 2rem; transform: translateY(-50%);
+            z-index: 50; display: none;
+        }
+        @media (min-width: 1280px) { .section-nav { display: block; } }
+        .section-nav ul { list-style: none; padding: 0; margin: 0; }
+        .section-nav a {
+            display: flex; align-items: center;
+            padding: 0.5rem 0; color: var(--text-sub);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            position: relative; transition: color 0.3s;
+        }
+        .section-nav a::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background-color: var(--text-sub); border-radius: 50%;
+            margin-right: 1rem; transition: all 0.3s;
+        }
+        .section-nav a.active, .section-nav a:hover { color: var(--primary-color); }
+        .section-nav a.active::before, .section-nav a:hover::before {
+            background-color: var(--primary-color);
+            transform: scale(1.5);
+        }
+
+        .reveal { opacity: 0; transform: translateY(50px); }
+        
+        .timeline-icon-wrapper {
+            position: relative; z-index: 1;
+        }
+        .timeline-icon-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border-width: 2px; margin: 0 auto;
+            background-color: var(--bg-main);
+            transition: all 0.4s ease-in-out;
+        }
+        .reveal-child:hover .timeline-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .btn-custom-text {
+            color: var(--btn-text-color);
+        }
+
+        /* Dashboard styles */
+        .dashboard-filter-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-sub);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dashboard-filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .dashboard-filter-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--btn-text-color);
+            font-weight: 700;
+        }
+        .kpi-card {
+            background: rgba(0,0,0,0.1);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">Loading...</div>
+    <div class="controls-container">
+        <a href="project-data-analytics.html" class="text-[var(--text-sub)] hover:text-[var(--primary-color)] transition-colors font-bold text-lg" aria-label="Switch to Japanese">JP</a>
+        <button id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+    </div>
+
+    <header class="fixed top-0 left-0 z-50 p-6">
+        <a href="index_en.html" class="glass-card inline-block px-4 py-2 text-sm hover:!border-[var(--primary-color)] transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Portfolio
+        </a>
+    </header>
+
+    <nav class="section-nav">
+        <ul>
+            <li><a href="#overview" class="active">Overview</a></li>
+            <li><a href="#timeline">Journey</a></li>
+            <li><a href="#challenge">Challenge</a></li>
+            <li><a href="#action">Process</a></li>
+            <li><a href="#deliverable">Deliverable</a></li>
+            <li><a href="#result">Result</a></li>
+            <li><a href="#takeaways">Takeaways</a></li>
+        </ul>
+    </nav>
+
+    <div class="flex">
+        <main class="w-full max-w-screen-lg mx-auto p-4 md:p-12 space-y-24">
+
+            <section id="hero-bg" class="rounded-2xl py-24 md:py-40 mt-16">
+                <div id="hero" class="text-center px-4">
+                    <p class="text-lg text-[var(--primary-color)] font-semibold reveal">PROJECT CASE STUDY</p>
+                    <h1 class="text-4xl md:text-6xl mt-2 mb-6 gradient-text reveal">Data-Driven Procurement Dashboard</h1>
+                    <p class="text-xl leading-relaxed font-normal max-w-3xl mx-auto text-[var(--text-main)] reveal">
+                        Improving data access by leveraging an existing database.<br>Transforming procurement from "experience and intuition" to "data-driven decision-making," contributing to the team's large-scale cost savings. <!-- Revised: Democratizing a siloed -> Improving data access by leveraging an existing -->
+                    </p>
+                </div>
+            </section>
+
+            <section id="overview" data-gsap-stagger>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-user text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Our Role</h3>
+                        <p class="text-[var(--text-sub)]">Procurement Staff / Data Analyst</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-chart-bar text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Key Tools</h3>
+                        <p class="text-[var(--text-sub)]">BI Tool / Database / Spreadsheet</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-bullseye text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Objective</h3>
+                        <p class="text-[var(--text-sub)]">Visualize Procurement & Reduce Costs</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="timeline">
+                <div class="section-title text-center mb-16">
+                    <h2 class="reveal gradient-text">Project Journey</h2>
+                </div>
+                <div class="relative max-w-4xl mx-auto px-4" data-gsap-stagger>
+                    <div class="absolute top-8 left-0 w-full h-0.5 bg-[var(--border-color)]"></div>
+                    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--secondary-color)]">
+                                    <i class="fas fa-lock text-2xl text-[var(--secondary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Challenge</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Limited data access &<br>Adherence to existing methods</p> <!-- Revised: Siloed DB -> Limited data access, Team Resistance -> Adherence to existing methods -->
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--primary-color)]">
+                                    <i class="fas fa-tachometer-alt text-2xl text-[var(--primary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Action</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Data Integration and<br>Dashboard Development</p>
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-yellow-400">
+                                    <i class="fas fa-lightbulb text-2xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Result</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Fostered a Data-Driven<br>Decision-Making Culture</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="challenge">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Background & Challenges</h2></div>
+                <div class="glass-card p-8 md:p-12 reveal">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-database text-2xl text-[var(--secondary-color)] mr-4"></i>Situation: Limited Data Access</h3> <!-- Revised: Siloed Database -> Limited Data Access -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                                Before the project, procurement data was stored in a database accessible and operable only by a few employees with specific skills. As a result, many team members couldn't quickly analyze "price trends" or "purchase volumes" for their assigned materials, making data-driven strategic decisions challenging. <!-- Revised: Siloed -> accessible and operable only by a few employees with specific skills, difficult -> challenging -->
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-exclamation-triangle text-2xl text-yellow-400 mr-4"></i>Difficulty: Data Quality and Concerns about Change</h3> <!-- Revised: Reliability and Resistance -> Quality and Concerns about Change -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                               The initial challenge was to understand the complex structure of the long-standing database and extract data of sufficient quality for analysis. Furthermore, some team members expressed concerns about the new approach, saying, "Numbers can't capture the nuances of the field," requiring careful explanation of the benefits of data utilization. <!-- Revised: decipher -> understand, reliability -> quality, resistance/skeptical -> concerns about change/concerns, shift in mindset -> careful explanation of the benefits -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="action">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Our Problem-Solving Process</h2></div>
+                <div class="max-w-3xl mx-auto" data-gsap-stagger>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-tasks"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Requirement Definition & Data Integration</h3><p class="text-[var(--text-sub)] font-normal">First, we interviewed procurement team members to thoroughly understand what information they used for daily decision-making and what Key Performance Indicators (KPIs) they wanted to visualize. Based on this, we built a system to automatically link data from the existing database to our BI tool.</p></div>
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-drafting-compass"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Dashboard Design & Development</h3><p class="text-[var(--text-sub)] font-normal">Using the collected data, we developed an interactive dashboard prototype with a BI tool. We designed it to show important KPIs at a glance, such as spending analysis by item and supplier, price fluctuation trends, and on-time delivery rates, iterating on the design with team reviews.</p></div>
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-search-dollar"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Insight Discovery & Sharing</h3><p class="text-[var(--text-sub)] font-normal">The dashboard revealed trends that were previously easy to overlook. For example, we found a component for one product whose unit price hadn't been reviewed for a long period, despite increasing purchase volumes. This was a cost-saving opportunity identified thanks to improved data accessibility.</p></div> <!-- Revised: no one had noticed -> easy to overlook, democratized -> improved data accessibility, major opportunity -> opportunity -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-users"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Data-Driven Action & Culture Change</h3><p class="text-[var(--text-sub)] font-normal">Based on this discovery, and collaborating with team members, we entered into price negotiations with the supplier and achieved cost reductions. This success story helped spread the recognition that "data can be negotiation material," sparking a cultural shift toward data-informed thinking.</p></div> <!-- Revised: help from senior colleagues/managers -> collaborating with team members, difficult -> (removed), significant -> (removed), powerful weapon -> negotiation material -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="deliverable" class="reveal">
+                <div class="section-title text-center mb-12">
+                    <h2 class="gradient-text">Deliverable Demo: Interactive Procurement Dashboard</h2>
+                </div>
+                <div class="glass-card p-4 sm:p-6 md:p-8">
+                    <!-- Filters -->
+                    <div class="flex flex-col gap-4 mb-6">
+                        <div id="dashboard-group-filters" class="flex flex-wrap items-center gap-2">
+                            <span class="font-semibold text-sm mr-2 text-[var(--text-sub)]">Group:</span>
+                            <button class="dashboard-filter-btn active" data-filter="All">All</button>
+                            <button class="dashboard-filter-btn" data-filter="Group 1">Group 1</button>
+                            <button class="dashboard-filter-btn" data-filter="Group 2">Group 2</button>
+                        </div>
+                        <div id="dashboard-product-filters" class="flex flex-wrap items-center gap-2">
+                            <span class="font-semibold text-sm mr-2 text-[var(--text-sub)]">Product:</span>
+                            <button class="dashboard-filter-btn" data-filter="Product A">Product A</button>
+                            <button class="dashboard-filter-btn" data-filter="Product B">Product B</button>
+                            <button class="dashboard-filter-btn" data-filter="Product C">Product C</button>
+                        </div>
+                    </div>
+            
+                    <!-- KPIs -->
+                    <div id="kpi-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <!-- KPI cards will be generated by JS -->
+                    </div>
+            
+                    <!-- Charts & Memo -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div>
+                            <canvas id="demand-chart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div id="donut-chart-container" class="flex flex-col items-center justify-center">
+                                <h3 id="donut-title" class="text-lg font-semibold mb-2 text-center"></h3>
+                                <canvas id="group-donut-chart" class="max-h-64"></canvas>
+                            </div>
+                            <div id="supplier-memo-container" class="hidden">
+                                 <h3 class="text-lg font-semibold mb-2">Supplier Memo</h3> <!-- English Title -->
+                                 <div id="supplier-memo-content" class="glass-card p-4 text-sm h-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="result">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Value Delivered</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="md:col-span-2 glass-card p-8 text-center reveal-child">
+                         <i class="fas fa-dollar-sign text-5xl text-green-400 mb-4"></i> <!-- Changed icon -->
+                        <h3 class="text-xl mb-2">Contributed to Team's Cost Reduction Goals</h3>
+                        <p class="text-4xl font-bold gradient-text my-4">Goal Achieved</p>
+                        <p class="text-[var(--text-sub)]">Insights from the dashboard became negotiation material, contributing to the team's overall goals. (Specific figures confidential)</p> <!-- Revised: powerful tool -> negotiation material, significantly contributing -> contributing -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-eye text-5xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Improved Data Access & Transparency</h3> <!-- Revised: Democratization -> Improved Data Access -->
+                        <p class="text-[var(--text-sub)] mt-4">Intuitive data access for everyone facilitated information sharing. Awareness regarding analysis also improved across the team.</p> <!-- Revised: eliminated silos -> facilitated information sharing, enhanced capabilities -> awareness improved -->
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-brain text-5xl text-[var(--secondary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Fostered a Data-Driven Culture</h3>
+                        <p class="text-[var(--text-sub)] mt-4">Through tangible success, a culture of utilizing "data" alongside "intuition" for decision-making began to take root in the team.</p> <!-- Revised: rather than -> alongside, relying on -> utilizing -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="takeaways">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Takeaways & Replicability</h2></div>
+                <div class="grid grid-cols-1 gap-8">
+                     <div class="glass-card p-8 md:p-12 reveal">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-lightbulb text-2xl text-[var(--secondary-color)] mr-4"></i>Data Creates Value When "Translated"</h3>
+                        <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                            Facing initial concerns, I learned that simply visualizing data isn't enough. However, the success of discovering a concrete trend—"the price hasn't been reviewed for a long time"—and turning it into action changed the team's mindset. I learned that data analysis involves understanding the context behind the numbers and presenting it as "evidence" that stakeholders can understand and act upon. <!-- Revised: resistance -> initial concerns, story -> trend, story -> evidence -->
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-tools text-[var(--primary-color)] mr-3"></i>Skills Used</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-center"><i class="fas fa-chart-bar mr-3 text-blue-400"></i>BI Tool</li>
+                                <li class="flex items-center"><i class="fas fa-database mr-3 text-indigo-400"></i>Database (incl. SQL)</li>
+                                <li class="flex items-center"><i class="fas fa-file-excel mr-3 text-green-400"></i>Spreadsheet (Advanced)</li>
+                                <li class="flex items-center"><i class="fas fa-users mr-3 text-yellow-400"></i>Stakeholder Management</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>Replication Points</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Start Small:</strong> Focus on solving one specific problem first to create a success story.</p></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Involve the Team:</strong> Listen to the daily questions and challenges of team members and reflect them in the dashboard.</p></li>
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Share Insights:</strong> Proactively share discoveries from the data to let the team experience the value of data utilization firsthand.</p></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center reveal">
+                 <a href="index_en.html" class="inline-block bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[var(--primary-color)]/20 btn-custom-text">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Portfolio
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docHtml = document.documentElement;
+            
+            // --- THEME ---
+            window.onload = () => { document.getElementById('loader').classList.add('hidden'); };
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleIcon = themeToggle.querySelector('i');
+            
+            function applyTheme() {
+                const isDark = docHtml.classList.contains('dark');
+                toggleIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+                // Trigger chart redraw on theme change
+                if (window.dashboard && window.dashboard.mainChart) {
+                    window.dashboard.updateDashboard(window.dashboard.currentFilter);
+                }
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                docHtml.classList.toggle('dark');
+                localStorage.setItem('theme', docHtml.classList.contains('dark') ? 'dark' : 'light');
+                applyTheme();
+            });
+
+            // Initial theme application (default dark)
+             if (localStorage.getItem('theme') === 'light') {
+                docHtml.classList.remove('dark');
+            } else {
+                 docHtml.classList.add('dark');
+            }
+            applyTheme();
+            
+            // --- GSAP ANIMATIONS ---
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('[data-gsap-stagger]').forEach(container => {
+                const targets = container.querySelectorAll('.reveal-child');
+                gsap.fromTo(targets, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                    scrollTrigger: { trigger: container, start: 'top 85%', toggleActions: 'play none none none' }
+                });
+            });
+            gsap.utils.toArray('.reveal').forEach(elem => {
+                gsap.fromTo(elem, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+                    scrollTrigger: { trigger: elem, start: 'top 90%', toggleActions: 'play none none none' }
+                });
+            });
+            // Removed counter animation
+            
+            // --- SECTION NAVIGATION ---
+            const sections = gsap.utils.toArray('main section');
+            const navLinks = gsap.utils.toArray('.section-nav a');
+            sections.forEach(section => {
+                ScrollTrigger.create({
+                    trigger: section, start: 'top center', end: 'bottom center',
+                    onToggle: self => {
+                        const navLink = document.querySelector(`.section-nav a[href="#${section.id}"]`);
+                        if (navLink) {
+                            if (self.isActive) {
+                                navLinks.forEach(link => link.classList.remove('active'));
+                                navLink.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // --- INTERACTIVE DASHBOARD ---
+            // (Same JS as Japanese version, assuming labels/text inside charts are handled ok or not critical for demo)
+             const dashboardModule = () => {
+                let mainChart, donutChart;
+                let currentFilter = 'All';
+
+                // Data setup (remains the same)
+                 const products = {
+                    'Product A': { group: 'Group 1', data: generateData(100, 0.02, 50, 0.01) },
+                    'Product B': { group: 'Group 1', data: generateData(150, 0.01, 70, 0.005) },
+                    'Product C': { group: 'Group 2', data: generateData(80, -0.01, 120, -0.005) }
+                };
+                
+                // English Memos
+                const supplierMemos = {
+                    'Product A': 'Main supplier is Alpha Inc. Price stability through long-term contract. Preparing for negotiations for next year\'s contract renewal.',
+                    'Product B': 'Dual suppliers: Beta Corp and Gamma Ltd. Beta has shown some delivery delays, considering increasing order ratio to Gamma.',
+                    'Product C': 'Exclusive supply from Delta Co. Need to start investigating alternative suppliers considering geopolitical risks.'
+                };
+
+
+                const labels = Array.from({ length: 18 }, (_, i) => {
+                    const month = (i % 12) + 1;
+                    const year = 2024 + Math.floor(i / 12);
+                    return `${year}-${String(month).padStart(2, '0')}`;
+                });
+
+                function generateData(baseDemand, demandTrend, basePrice, priceTrend) {
+                    const data = [];
+                    for (let i = 0; i < 18; i++) {
+                        const seasonality = Math.sin((i / 12) * 2 * Math.PI) * 0.2 + 1;
+                        const demand = baseDemand * (1 + demandTrend * i) * seasonality * (1 + (Math.random() - 0.5) * 0.1);
+                        const price = basePrice * (1 + priceTrend * i) * (1 - seasonality * 0.05) * (1 + (Math.random() - 0.5) * 0.05);
+                        data.push({
+                            demand: i < 12 ? Math.round(demand) : null,
+                            predictedDemand: i >= 11 ? Math.round(demand) : null,
+                            price: i < 12 ? parseFloat(price.toFixed(2)) : null,
+                            predictedPrice: i >= 11 ? parseFloat(price.toFixed(2)) : null,
+                        });
+                    }
+                    return data;
+                }
+                
+                function getFilteredData(filter) {
+                    const productKeys = Object.keys(products);
+                    let keysToSum = [];
+                    if (filter === 'All') keysToSum = productKeys;
+                    else if (filter.startsWith('Group')) keysToSum = productKeys.filter(k => products[k].group === filter);
+                    else keysToSum = [filter]; // Filter is a Product name
+
+                    const aggregatedData = labels.map((_, i) => {
+                        return keysToSum.reduce((acc, key) => {
+                            const productData = products[key].data[i];
+                            acc.demand += productData.demand || 0;
+                            acc.predictedDemand += productData.predictedDemand || 0;
+                             // Calculate weighted average price based on demand
+                            const currentDemand = productData.demand || 0;
+                            const currentPrice = productData.price || 0;
+                            acc.totalSpending += currentDemand * currentPrice;
+                            acc.totalDemand += currentDemand;
+
+                            const predDemand = productData.predictedDemand || 0;
+                            const predPrice = productData.predictedPrice || 0;
+                            acc.totalPredSpending += predDemand * predPrice;
+                            acc.totalPredDemand += predDemand;
+                            return acc;
+                        }, { demand: 0, predictedDemand: 0, totalSpending: 0, totalDemand: 0, totalPredSpending: 0, totalPredDemand: 0 });
+                    });
+                    
+                    aggregatedData.forEach(d => {
+                        d.price = d.totalDemand > 0 ? d.totalSpending / d.totalDemand : 0;
+                        d.predictedPrice = d.totalPredDemand > 0 ? d.totalPredSpending / d.totalPredDemand : 0;
+                    });
+                    
+                    return { keys: keysToSum, data: aggregatedData };
+                }
+
+
+                function updateKPIs(filteredData) {
+                     const kpiContainer = document.getElementById('kpi-container');
+                    const actuals = filteredData.data.filter(d => d.demand !== null);
+                    const preds = filteredData.data.filter(d => d.predictedDemand !== null);
+
+                    const totalDemand = actuals.reduce((sum, d) => sum + d.demand, 0);
+                    const totalSpending = actuals.reduce((sum,d) => sum + d.totalSpending, 0);
+                    const avgPrice = totalDemand > 0 ? totalSpending / totalDemand : 0; 
+                    const predictedTotalDemand = preds.reduce((sum, d) => sum + d.predictedDemand, 0);
+                    const nextMonthForecast = preds.length > 0 ? preds[0].predictedDemand : 0;
+
+                    // English KPI Labels
+                    const kpis = [
+                        { label: 'Total Demand (Actual)', value: totalDemand.toLocaleString(), icon: 'fa-cubes' },
+                        { label: 'Avg Price (Actual)', value: `¥${avgPrice.toFixed(2)}`, icon: 'fa-yen-sign' }, // Assuming JPY is okay
+                        { label: 'Total Demand (Forecast)', value: predictedTotalDemand.toLocaleString(), icon: 'fa-chart-line' },
+                        { label: 'Next Month Forecast', value: nextMonthForecast.toLocaleString(), icon: 'fa-calendar-alt' },
+                    ];
+
+                    kpiContainer.innerHTML = kpis.map(kpi => `
+                        <div class="kpi-card reveal-child">
+                            <p class="text-sm text-[var(--text-sub)]">${kpi.label}</p>
+                            <p class="text-2xl font-bold mt-1">${kpi.value}</p>
+                        </div>
+                    `).join('');
+                     gsap.utils.toArray('#kpi-container .reveal-child').forEach(elem => {
+                       gsap.fromTo(elem, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', delay: 0.1 });
+                    });
+                }
+
+
+                function updateMainChart(filteredData) {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const textColor = isDark ? '#a1a1aa' : '#737373';
+                    const gridColor = isDark ? 'rgba(0, 203, 170, 0.1)' : 'rgba(0,0,0,0.05)';
+                    
+                    const demandData = filteredData.data.map(d => d.demand);
+                    const predDemandData = filteredData.data.map(d => d.predictedDemand);
+                    const priceData = filteredData.data.map(d => d.price ? d.price.toFixed(2) : null);
+                    const predPriceData = filteredData.data.map(d => d.predictedPrice ? d.predictedPrice.toFixed(2) : null);
+
+                    // English Chart Labels
+                    const chartConfig = {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                { type: 'line', label: 'Avg Price (Actual)', data: priceData, yAxisID: 'y1', borderColor: isDark ? '#F97316' : '#EA580C', tension: 0.3, pointRadius: 2, borderWidth: 2, spanGaps: true },
+                                { type: 'line', label: 'Market Price (Forecast)', data: predPriceData, yAxisID: 'y1', borderColor: isDark ? '#F97316' : '#EA580C', borderDash: [5, 5], tension: 0.3, pointRadius: 2, borderWidth: 2, spanGaps: true },
+                                { type: 'bar', label: 'Demand (Actual)', data: demandData, yAxisID: 'y', backgroundColor: isDark ? 'rgba(0, 203, 170, 0.6)' : 'rgba(3, 136, 123, 0.6)'},
+                                { type: 'bar', label: 'Demand (Forecast)', data: predDemandData, yAxisID: 'y', backgroundColor: isDark ? 'rgba(0, 203, 170, 0.3)' : 'rgba(3, 136, 123, 0.3)'},
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            interaction: { mode: 'index', intersect: false },
+                            scales: {
+                                y: { position: 'left', title: { display: true, text: 'Demand', color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } }, // English Axis Title
+                                y1: { position: 'right', title: { display: true, text: 'Avg Price (JPY)', color: textColor }, ticks: { color: textColor }, grid: { drawOnChartArea: false } }, // English Axis Title
+                                x: { ticks: { color: textColor }, grid: { display: false } }
+                            },
+                            plugins: {
+                                legend: { labels: { color: textColor } },
+                                tooltip: { titleColor: isDark ? '#F3F3F3' : '#212121', bodyColor: isDark ? '#F3F3F3' : '#212121', backgroundColor: isDark ? '#171717' : '#FAFAFA' }
+                            }
+                        }
+                    };
+
+
+                    if (mainChart) {
+                        mainChart.data = chartConfig.data;
+                        mainChart.options = chartConfig.options;
+                        mainChart.update();
+                    } else {
+                        mainChart = new Chart(document.getElementById('demand-chart'), chartConfig);
+                    }
+                }
+                
+                function updateDonutChart(filter) {
+                    const donutContainer = document.getElementById('donut-chart-container');
+                    const donutTitle = document.getElementById('donut-title');
+                     
+                    if (filter !== 'All' && !filter.startsWith('Group 1') && filter !== 'Product A' && filter !== 'Product B') {
+                         donutContainer.style.display = 'none';
+                         return;
+                    }
+
+                    donutTitle.textContent = 'Group 1 Breakdown (Actual Demand)'; // English Title
+                    const a_demand = products['Product A'].data.reduce((sum, d) => sum + (d.demand || 0), 0);
+                    const b_demand = products['Product B'].data.reduce((sum, d) => sum + (d.demand || 0), 0);
+                    
+                    donutContainer.style.display = 'flex';
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const donutConfig = {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Product A', 'Product B'], // English Labels
+                            datasets: [{ data: [a_demand, b_demand], backgroundColor: [isDark ? '#00CBAA' : '#03887B', isDark ? '#9D4EDD' : '#6F2DA8'], borderWidth: 0 }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            cutout: '60%',
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: isDark ? '#a1a1aa' : '#737373' } }
+                            }
+                        }
+                    };
+                    
+                    if(donutChart) {
+                       donutChart.data = donutConfig.data;
+                       donutChart.options = donutConfig.options;
+                       donutChart.update();
+                    } else {
+                        donutChart = new Chart(document.getElementById('group-donut-chart'), donutConfig);
+                    }
+                }
+                
+                function updateSupplierMemo(filter) {
+                    const memoContainer = document.getElementById('supplier-memo-container');
+                    const memoContent = document.getElementById('supplier-memo-content');
+                     const memoTitle = memoContainer.querySelector('h3'); // Select the title element
+                    if (supplierMemos[filter]) {
+                         if (memoTitle) memoTitle.textContent = 'Supplier Memo'; // Update title to English
+                        memoContainer.classList.remove('hidden');
+                        memoContent.innerHTML = `<p>${supplierMemos[filter]}</p>`; // Assumes supplierMemos are already in English
+                    } else {
+                        memoContainer.classList.add('hidden');
+                    }
+                }
+
+                 function updateDashboard(filter) {
+                    currentFilter = filter;
+                    const filteredData = getFilteredData(filter);
+                    updateKPIs(filteredData);
+                    updateMainChart(filteredData);
+                    updateDonutChart(filter);
+                    updateSupplierMemo(filter);
+                }
+
+                function init() {
+                    document.querySelectorAll('.dashboard-filter-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const newFilter = e.target.dataset.filter;
+                            if (newFilter.startsWith('Group') || newFilter === 'All') {
+                                document.querySelectorAll('#dashboard-product-filters .dashboard-filter-btn.active').forEach(b => b.classList.remove('active'));
+                            } else {
+                                document.querySelectorAll('#dashboard-group-filters .dashboard-filter-btn.active').forEach(b => b.classList.remove('active'));
+                            }
+                            document.querySelectorAll('.dashboard-filter-btn').forEach(b => b.classList.remove('active'));
+                            e.target.classList.add('active');
+                            updateDashboard(newFilter);
+                        });
+                    });
+                    document.querySelector('#dashboard-group-filters .dashboard-filter-btn[data-filter="All"]').classList.add('active');
+                    updateDashboard('All');
+                }
+                
+                init();
+
+                return { updateDashboard, mainChart, donutChart, currentFilter }; 
+            };
+            
+            window.dashboard = dashboardModule();
+        });
+    </script>
+</body>
+</html>

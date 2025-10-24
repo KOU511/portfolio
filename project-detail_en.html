@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study - Core System Migration Project</title>
+
+    <!-- SEO & OGP -->
+    <meta name="description" content="Building a management foundation for future growth. A case study on a core system migration project completed by involving all departments with limited resources.">
+    <meta property="og:title" content="Case Study - Core System Migration Project">
+    <meta property="og:description" content="A project that integrated department-specific legacy systems into a new system, achieving operational efficiency and strengthening internal controls."> <!-- Revised: siloed -> department-specific -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://kou511.github.io/my-portfolio/project-detail_en.html"> 
+    <meta property="og:image" content="https://kou511.github.io/my-portfolio/images/ogp-system-migration.webp"> 
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/favicon.webp">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Flicker-Fix Script (Default to Dark Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark'); // Default to dark
+        }
+    </script>
+
+    <!-- Fonts, CSS, Icons -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"> <!-- Removed Japanese font -->
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+
+    <style>
+        :root {
+            /* Light Mode Theme */
+            --primary-color: #03887B;      /* Deep Mint Green */
+            --secondary-color: #6F2DA8;   /* Deep Purple */
+            --bg-main: #FAFAFA;           /* Bright off-white */
+            --bg-card: rgba(255, 255, 255, 0.8);
+            --border-color: #e5e5e5;      /* Neutral-200 */
+            --text-main: #212121;         /* Deep black */
+            --text-sub: #737373;          /* Neutral-500 */
+            --shadow-color: rgba(0,0,0,0.07);
+            --dynamic-grad-opacity: 0.05;
+            --btn-text-color: #FAFAFA;
+            --accent-gradient: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+
+        html.dark {
+            /* Dark Mode Theme */
+            --primary-color: #00CBAA;      /* Emerald Green */
+            --secondary-color: #9D4EDD;   /* Vibrant Violet */
+            --bg-main: #171717;           /* Near-black gray */
+            --bg-card: rgba(39, 39, 39, 0.6); /* Translucent #272727 */
+            --border-color: rgba(0, 203, 170, 0.2); /* Translucent primary */
+            --text-main: #F3F3F3;         /* Pure white */
+            --text-sub: #a1a1aa;          /* Mid-gray */
+            --shadow-color: rgba(0,0,0,0.5);
+            --dynamic-grad-opacity: 0.07;
+            --btn-text-color: #171717;
+        }
+        
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', sans-serif; /* Use Poppins as primary */
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.4s, color 0.4s;
+            font-weight: 400;
+        }
+        h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, var(--primary-color), transparent 40%),
+                        radial-gradient(circle at 85% 30%, var(--secondary-color), transparent 40%),
+                        radial-gradient(circle at 50% 90%, #3a2d80, transparent 50%);
+            background-color: var(--bg-main); opacity: var(--dynamic-grad-opacity); z-index: -1;
+            animation: gradient-flow 20s ease-in-out infinite;
+            transition: opacity 0.4s;
+        }
+        @keyframes gradient-flow {
+            0%, 100% { background-position: 0% 50%, 0% 50%, 0% 50%; }
+            50% { background-position: 100% 50%, 100% 50%, 100% 50%; }
+        }
+
+        .glass-card {
+            background: var(--bg-card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s, background-color 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); background-repeat: repeat; opacity: 0.025; }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: rgba(0, 203, 170, 0.5);
+        }
+
+        #loader {
+            position: fixed; inset: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-main); color: var(--primary-color);
+            font-size: 2rem; font-weight: bold;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        
+        .controls-container {
+            position: fixed; 
+            top: 1.5rem; right: 1.5rem; 
+            z-index: 51;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #theme-toggle {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        #theme-toggle i { color: var(--text-sub); transition: color 0.3s, transform 0.3s; }
+        #theme-toggle:hover i { color: var(--primary-color); transform: rotate(15deg); }
+        
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; color: transparent;
+        }
+
+        #hero-bg {
+            background-image: url('images/System_Migration.webp');
+            background-size: cover; background-position: center; position: relative;
+        }
+        #hero-bg::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(23, 23, 23, 0.9) 0%, rgba(23, 23, 23, 0.7) 100%);
+            z-index: 1;
+        }
+        html:not(.dark) #hero-bg::before {
+             background: linear-gradient(180deg, rgba(250, 250, 250, 0.9) 0%, rgba(250, 250, 250, 0.7) 100%);
+        }
+        #hero-bg > * { position: relative; z-index: 2; }
+
+        .timeline-card { 
+            position: relative; padding-left: 4rem; padding-bottom: 2.5rem;
+        }
+        .timeline-card:last-child { padding-bottom: 0; }
+        .timeline-card::before {
+            content: ''; position: absolute; left: 28px; top: 0.5rem;
+            width: 2px; height: 100%; background: var(--border-color); 
+        }
+        .timeline-card:last-child::before { display: none; }
+        
+        .timeline-icon {
+            position: absolute; left: 0; top: 0; width: 60px; height: 60px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--btn-text-color); background: var(--primary-color);
+            border: 2px solid var(--border-color); z-index: 1; transition: all 0.3s;
+        }
+
+        .section-nav {
+            position: fixed; top: 50%; left: 2rem; transform: translateY(-50%);
+            z-index: 50; display: none;
+        }
+        @media (min-width: 1280px) { .section-nav { display: block; } }
+        .section-nav ul { list-style: none; padding: 0; margin: 0; }
+        .section-nav a {
+            display: flex; align-items: center;
+            padding: 0.5rem 0; color: var(--text-sub);
+            text-decoration: none; font-size: 0.875rem; font-weight: 500;
+            position: relative; transition: color 0.3s;
+        }
+        .section-nav a::before {
+            content: ''; display: inline-block; width: 8px; height: 8px;
+            background-color: var(--text-sub); border-radius: 50%;
+            margin-right: 1rem; transition: all 0.3s;
+        }
+        .section-nav a.active, .section-nav a:hover { color: var(--primary-color); }
+        .section-nav a.active::before, .section-nav a:hover::before {
+            background-color: var(--primary-color);
+            transform: scale(1.5);
+        }
+
+        .reveal { opacity: 0; transform: translateY(50px); }
+        
+        .timeline-icon-wrapper {
+            position: relative; z-index: 1;
+        }
+        .timeline-icon-circle {
+            width: 64px; height: 64px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border-width: 2px; margin: 0 auto;
+            background-color: var(--bg-main);
+            transition: all 0.4s ease-in-out;
+        }
+        .reveal-child:hover .timeline-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .btn-custom-text {
+            color: var(--btn-text-color);
+        }
+
+        /* Process Map Styles */
+        .process-map-container { position: relative; }
+        .main-workflow-nav-item, .sub-workflow-card, .data-record-item, .connector-line {
+             transition: opacity 0.4s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .filtered-out { opacity: 0.2; pointer-events: none; }
+        .filter-btn { 
+            transition: all 0.3s ease; 
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        .filter-btn:hover {
+             border-color: var(--primary-color);
+        }
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--btn-text-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        .main-workflow-nav-item { cursor: pointer; border-left: 4px solid transparent; }
+        .main-workflow-nav-item.active {
+            border-left-color: var(--primary-color);
+            background-color: rgba(0, 203, 170, 0.1);
+        }
+        html:not(.dark) .main-workflow-nav-item.active {
+             background-color: rgba(3, 136, 123, 0.1);
+        }
+        
+        #connector-lines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+        .connector-line { stroke-width: 2px; stroke: var(--primary-color); fill: none; }
+        .sub-workflow-card { cursor: pointer; }
+        .workflow-details-container { max-height: 0; overflow: hidden;
+            transition: max-height 0.5s ease-in-out, margin-top 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            margin-top: 0; opacity: 0; cursor: default;
+        }
+        .workflow-details-container.open { max-height: 500px; margin-top: 0.75rem; opacity: 1; }
+        .expand-indicator .icon { transition: transform 0.3s ease-in-out; }
+        .sub-workflow-card.expanded .expand-indicator .icon { transform: rotate(180deg); }
+        .auto-notify {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .team-tag-dev  { color: #34d399; } /* Emerald */
+        .team-tag-mfg  { color: #fbbf24; } /* Amber */
+        .team-tag-scm  { color: #60a5fa; } /* Blue */
+        .team-tag-qa   { color: #f472b6; } /* Pink */
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loader">Loading...</div>
+    <div class="controls-container">
+        <a href="project-detail.html" class="text-[var(--text-sub)] hover:text-[var(--primary-color)] transition-colors font-bold text-lg" aria-label="Switch to Japanese">JP</a>
+        <button id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+    </div>
+
+    <header class="fixed top-0 left-0 z-50 p-6">
+        <a href="index_en.html" class="glass-card inline-block px-4 py-2 text-sm hover:!border-[var(--primary-color)] transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Portfolio
+        </a>
+    </header>
+
+    <nav class="section-nav">
+        <ul>
+            <li><a href="#overview" class="active">Overview</a></li>
+            <li><a href="#timeline">Journey</a></li>
+            <li><a href="#challenge">Challenge</a></li>
+            <li><a href="#action">Process</a></li>
+            <li><a href="#process-map">Workflow</a></li> <!-- English Label -->
+            <li><a href="#result">Result</a></li>
+            <li><a href="#takeaways">Takeaways</a></li>
+        </ul>
+    </nav>
+
+    <div class="flex">
+        <main class="w-full max-w-screen-lg mx-auto p-4 md:p-12 space-y-24">
+
+            <section id="hero-bg" class="rounded-2xl py-24 md:py-40 mt-16">
+                <div id="hero" class="text-center px-4">
+                    <p class="text-lg text-[var(--primary-color)] font-semibold reveal">PROJECT CASE STUDY</p>
+                    <h1 class="text-4xl md:text-6xl mt-2 mb-6 gradient-text reveal">Core System Migration Project</h1>
+                    <p class="text-xl leading-relaxed font-normal max-w-3xl mx-auto text-[var(--text-main)] reveal">
+                        Building a management foundation to support future growth. A project completed with limited resources by involving all departments.
+                    </p>
+                </div>
+            </section>
+
+            <section id="overview" data-gsap-stagger>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-user-tie text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">My Role</h3>
+                        <p class="text-[var(--text-sub)]">Project Manager</p>
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-calendar-alt text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Project Duration</h3>
+                        <p class="text-[var(--text-sub)]">Approx. 1 Year</p> 
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-check-double text-4xl text-[var(--primary-color)] mb-3"></i>
+                        <h3 class="text-xl mb-2">Objective</h3>
+                        <p class="text-[var(--text-sub)]">Improve Efficiency & Strengthen Internal Controls</p> 
+                    </div>
+                </div>
+            </section>
+            
+            <section id="timeline">
+                <div class="section-title text-center mb-16">
+                    <h2 class="reveal gradient-text">Project Journey</h2>
+                </div>
+                <div class="relative max-w-4xl mx-auto px-4" data-gsap-stagger>
+                    <div class="absolute top-8 left-0 w-full h-0.5 bg-[var(--border-color)]"></div>
+                    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--secondary-color)]">
+                                    <i class="fas fa-unlink text-2xl text-[var(--secondary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Challenge</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Independent legacy systems &<br>Lack of interdept. coordination</p> <!-- Revised: siloed -> independent, barriers -> lack of coordination -->
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-[var(--primary-color)]">
+                                    <i class="fas fa-sitemap text-2xl text-[var(--primary-color)]"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Action</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Company-wide planning and<br>dialogue-driven execution</p> 
+                        </div>
+                        <div class="text-center reveal-child">
+                            <div class="timeline-icon-wrapper">
+                                <div class="timeline-icon-circle border-yellow-400">
+                                    <i class="fas fa-building-shield text-2xl text-yellow-400"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl mt-4 mb-2">Result</h3>
+                            <p class="text-sm text-[var(--text-sub)]">Established a controlled<br>management foundation</p> 
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="challenge">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Background & Challenges</h2></div>
+                <div class="glass-card p-8 md:p-12 reveal">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-building text-2xl text-[var(--secondary-color)] mr-4"></i>Situation: System Challenges Accompanying Growth</h3> <!-- Revised: Hindering -> Accompanying -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                                Before the project, the company utilized department-specific legacy systems. As the business expanded, however, integration issues between systems became apparent. Data was managed by each department, and manual integration became increasingly necessary. Furthermore, looking towards future business expansion, it was recognized that the existing systems would make it difficult to meet requirements for strengthened internal controls, presenting a key management challenge. <!-- Revised: relied on -> utilized, optimized -> specific, limitations became clear -> integration issues became apparent, siloed -> managed by each department, inefficient manual processes were common -> manual integration became increasingly necessary, couldn't meet -> difficult to meet, posing -> presenting, major -> key -->
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-exclamation-triangle text-2xl text-yellow-400 mr-4"></i>Difficulty: Unexpected Concerns and Technical Issues</h3> <!-- Revised: Hurdles -> Issues -->
+                            <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                               While initial planning suggested a smooth process, concerns were raised by certain departments about adopting new mechanisms. Unexpected issues were also found during data migration tests from the legacy system, temporarily raising concerns about the schedule. With limited resources, we had to address both technical issues and stakeholder alignment simultaneously. <!-- Revised: strong concerns -> concerns, errors occurred -> issues were found, jeopardizing -> raising concerns about, human challenges -> stakeholder alignment -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="action">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Our Problem-Solving Process</h2></div>
+                <div class="max-w-3xl mx-auto" data-gsap-stagger>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-clipboard-list"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Planning and Dialogue</h3><p class="text-[var(--text-sub)] font-normal">Detailed planning formed the project's foundation. We started by conducting extensive interviews with all relevant departments to identify field challenges and needs. Based on this, we created a Work Breakdown Structure (WBS) detailing tasks to the smallest unit, sharing a "blueprint" that clearly defined who needed to do what, by when, for all members.</p></div> <!-- Revised: Solid -> Detailed, true needs -> needs -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-users-cog"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Driving Force Involving All Departments</h3><p class="text-[var(--text-sub)] font-normal">System migration isn't just an IT job. We involved key personnel from each department from the outset, fostering a sense of ownership in "building our system." We listened sincerely to the opinions shared, built trust through persistent dialogue, ensured transparent progress tracking in bi-weekly meetings, and cultivated a team culture of resolving issues on the spot.</p></div> <!-- Revised: concerns -> the opinions shared -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Identifying and Preparing for Risks</h3><p class="text-[var(--text-sub)] font-normal">We anticipated "all possible obstacles," comprehensively listing everything from technical issues to personnel coordination items, and formulated specific contingency plans for each. For data migration, where issues were identified, we collaborated with the IT department to analyze the causes, and migration procedures and tools were improved to address the issue.</p></div> <!-- Revised: Anticipating -> Identifying, troubles -> coordination items, frequently encountered errors -> where issues were identified, thoroughly analyze -> analyze, modified the migration tool itself -> migration procedures and tools were improved -->
+                    </div>
+                    <div class="timeline-card reveal-child">
+                        <div class="timeline-icon"><i class="fas fa-redo"></i></div>
+                        <div class="glass-card p-8"><h3 class="text-xl mb-2">Careful Rehearsals</h3><p class="text-[var(--text-sub)] font-normal">Go-live success depends on the quality of preparation. We conducted multiple rehearsals following procedures similar to the actual migration, including data transfer, system switchover, and operational checks involving end-users. After each run, we identified issues, confirmed improvements, made adjustments, and deepened understanding, refining the migration process. We believe this preparation led to a smooth transition and contributed to the team's sense of security.</p></div> <!-- Revised: exact -> similar, thorough preparation -> preparation, boosted confidence -> contributed to sense of security -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="process-map" class="reveal">
+                <div class="section-title text-center mb-12">
+                    <h2 class="gradient-text">Abstracted Workflow After Reform</h2> <!-- English Title -->
+                </div>
+                <p class="text-center text-lg text-[var(--text-sub)] max-w-3xl mx-auto mb-8">This is an abstracted diagram of the actual operational + system workflow created. Select a phase on the left and filter by department to highlight relevant processes and deliverables.</p> <!-- English Text -->
+                
+                 <!-- Process Map Container (No content changes needed here) -->
+                <div class="glass-card p-4 md:p-8">
+                    <div id="team-filter" class="flex justify-center flex-wrap gap-2 mb-8">
+                        <button data-team="all" class="filter-btn active py-2 px-4 rounded-full">All Depts</button> <!-- English Label -->
+                        <button data-team="dev" class="filter-btn py-2 px-4 rounded-full">Dev/Tech</button> <!-- English Label -->
+                        <button data-team="mfg" class="filter-btn py-2 px-4 rounded-full">Mfg</button> <!-- English Label -->
+                        <button data-team="scm" class="filter-btn py-2 px-4 rounded-full">SCM</button> <!-- English Label -->
+                        <button data-team="qa" class="filter-btn py-2 px-4 rounded-full">QC/QA</button> <!-- English Label -->
+                    </div>
+                    
+                    <div class="process-map-container flex flex-col md:flex-row gap-6 lg:gap-8">
+                        <svg id="connector-lines" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></svg>
+                        
+                        <nav class="w-full md:w-1/4 lg:w-1/5">
+                            <div class="space-y-4">
+                                <div class="main-workflow-nav-item glass-card p-4" data-workflow="plan" data-teams="dev mfg scm">
+                                    <h3 class="text-lg">1. R&D / Inquiry</h3> <!-- English Label -->
+                                </div>
+                                <div class="text-center text-2xl text-[var(--primary-color)]">↓</div>
+                                 <div class="main-workflow-nav-item glass-card p-4" data-workflow="dev" data-teams="mfg scm dev">
+                                    <h3 class="text-lg">2. Mfg Decision & Prod.</h3> <!-- English Label -->
+                                </div>
+                                <div class="text-center text-2xl text-[var(--primary-color)]">↓</div>
+                                 <div class="main-workflow-nav-item glass-card p-4" data-workflow="release" data-teams="mfg scm qa">
+                                    <h3 class="text-lg">3. Testing & Shipping</h3> <!-- English Label -->
+                                </div>
+                            </div>
+                        </nav>
+
+                        <main id="workflow-details" class="w-full md:w-1/2 lg:w-3/5 glass-card p-6 min-h-[400px]">
+                            <!-- Content will be injected by JavaScript -->
+                             <div class="flex items-center justify-center h-full text-[var(--text-sub)]"><p>Please select a workflow stage on the left.</p></div> <!-- English Placeholder -->
+                        </main>
+
+                        <aside class="w-full md:w-1/4 lg:w-1/5">
+                             <div class="glass-card p-4 sticky top-6">
+                                 <h3 class="text-xl mb-4 border-b-2 border-[var(--border-color)] pb-2">Deliverables/Systems</h3> <!-- English Label -->
+                                <ul id="data-records-list" class="space-y-2 text-sm text-[var(--text-sub)]">
+                                   <!-- English Labels -->
+                                   <li id="record-request-sheet" data-teams="mfg scm" class="data-record-item flex items-center p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/5"><a href="#" class="flex items-center w-full"><i class="fas fa-file-excel fa-fw mr-3 text-green-400"></i><span>Opportunity Mgmt Sheet</span></a></li>
+                                   <li id="record-shipping-form" data-teams="scm" class="data-record-item flex items-center p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/5"><a href="#" class="flex items-center w-full"><i class="fas fa-shipping-fast fa-fw mr-3 text-blue-400"></i><span>Shipping Request</span></a></li>
+                                   <li id="record-mfg-order" data-teams="scm mfg" class="data-record-item flex items-center p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/5"><a href="#" class="flex items-center w-full"><i class="fas fa-industry fa-fw mr-3 text-gray-400"></i><span>Mfg. Work Order</span></a></li>
+                                   <li id="record-sales-system" data-teams="mfg" class="data-record-item flex items-center p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/5"><a href="#" class="flex items-center w-full"><i class="fas fa-cogs fa-fw mr-3 text-yellow-400"></i><span>Sales Mgmt System</span></a></li>
+                                   <li id="record-erp-system" data-teams="scm mfg" class="data-record-item flex items-center p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/5"><a href="#" class="flex items-center w-full"><i class="fas fa-server fa-fw mr-3 text-indigo-400"></i><span>Core System (ERP)</span></a></li>
+                                   <li id="record-chat-tool" data-teams="dev scm mfg qa" class="data-record-item flex items-center p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/5"><a href="#" class="flex items-center w-full"><i class="fab fa-slack fa-fw mr-3 text-pink-400"></i><span>Chat Tool</span></a></li>
+                                   <li id="record-meeting-minutes" data-teams="dev mfg" class="data-record-item flex items-center p-2 rounded-md transition-colors hover:bg-white/10 dark:hover:bg-white/5"><a href="#" class="flex items-center w-full"><i class="fas fa-calendar-alt fa-fw mr-3 text-teal-400"></i><span>Meeting Minutes</span></a></li>
+                                </ul>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+            <section id="result">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Value Delivered</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8" data-gsap-stagger>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-check-circle text-5xl text-green-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">On-Time, On-Budget Delivery</h3> 
+                        <p class="text-[var(--text-sub)]">Despite tight constraints, the project was completed on schedule and within budget.</p> 
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-chart-line text-5xl text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl mb-2">Strengthened Management Foundation</h3> 
+                        <p class="text-[var(--text-sub)]">Built a transparent and reliable system foundation capable of meeting requirements for enhanced internal controls.</p> 
+                    </div>
+                    <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-brain text-5xl text-[var(--primary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Supported Data-Driven Culture</h3> <!-- Revised: Fostered -> Supported -->
+                        <p class="text-[var(--text-sub)]">Centralized data enabled accurate real-time situational awareness, promoting rapid, data-informed decision-making.</p>
+                    </div>
+                     <div class="glass-card p-8 text-center reveal-child">
+                        <i class="fas fa-network-wired text-5xl text-[var(--secondary-color)] mb-4"></i>
+                        <h3 class="text-xl mb-2">Enhanced Process Integration & Unification</h3> <!-- Revised: Automation -> Integration -->
+                        <p class="text-[var(--text-sub)]">Unified data infrastructure and automated integration reduced manual work and contributed to smoother inter-departmental communication.</p> <!-- Revised: streamlined -> contributed to smoother -->
+                    </div>
+                </div>
+            </section>
+            
+            <section id="takeaways">
+                <div class="section-title text-center mb-12"><h2 class="reveal gradient-text">Takeaways & Replicability</h2></div>
+                <div class="grid grid-cols-1 gap-8">
+                    <div class="glass-card p-8 md:p-12 reveal">
+                        <h3 class="text-2xl mb-4 flex items-center"><i class="fas fa-lightbulb text-2xl text-[var(--secondary-color)] mr-4"></i>The Importance of Addressing Concerns About Change</h3> <!-- Revised title -->
+                        <p class="text-[var(--text-sub)] leading-relaxed pl-10 font-normal">
+                           The initial concerns from stakeholders were likely not just resistance to change, but stemmed from a lack of understanding or "concerns" about the impact of the new system and processes. We adopted an approach of understanding these concerns through individual hearings and dialogue, carefully working to resolve them, rather than simply explaining our position unilaterally. This experience taught me that a crucial part of project success involves understanding stakeholder perspectives and feelings, and engaging them as "collaborators" working towards a common goal. <!-- Revised: anxiety -> concerns, refuting -> unilaterally explaining, empathizing -> understanding perspectives and feelings -->
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" data-gsap-stagger>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-tools text-[var(--primary-color)] mr-3"></i>Skills Used</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-center"><i class="fas fa-tasks mr-3 text-blue-400"></i>Project Management (WBS)</li>
+                                <li class="flex items-center"><i class="fas fa-users mr-3 text-yellow-400"></i>Stakeholder Management</li>
+                                <li class="flex items-center"><i class="fas fa-file-signature mr-3 text-green-400"></i>Requirement Definition & Workflow Design</li>
+                                <li class="flex items-center"><i class="fas fa-database mr-3 text-indigo-400"></i>Data Migration Planning & Execution</li>
+                            </ul>
+                        </div>
+                        <div class="glass-card p-8 reveal-child">
+                            <h3 class="text-xl mb-4 flex items-center"><i class="fas fa-lightbulb text-[var(--primary-color)] mr-3"></i>Replication Points</h3>
+                            <ul class="space-y-2 text-[var(--text-sub)]">
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Clear Planning:</strong> Use a WBS to break down tasks and clarify responsibilities and deadlines.</p></li> <!-- Revised: Thorough -> Clear -->
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Engage Through Dialogue:</strong> Listen to stakeholder opinions, resolve concerns through conversation, and foster ownership.</p></li> <!-- Revised: concerns -> opinions, anxieties -> concerns -->
+                                <li class="flex items-start"><i class="fas fa-check mr-3 mt-1 text-green-400"></i><p><strong>Emphasize Rehearsals:</strong> Conduct rehearsals simulating go-live to identify risks and increase team proficiency.</p></li> <!-- Revised: realistic -> simulating go-live, build confidence -> increase proficiency -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="text-center reveal">
+                 <a href="index_en.html" class="inline-block bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-[var(--primary-color)]/20 btn-custom-text">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Portfolio
+                </a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const docHtml = document.documentElement;
+            
+            // --- THEME ---
+            // ★ Moved loader hiding to inside DOMContentLoaded
+            const loader = document.getElementById('loader');
+            if (loader) { 
+                 loader.classList.add('hidden');
+            } else {
+                console.error("Loader element not found!"); 
+            }
+
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleIcon = themeToggle ? themeToggle.querySelector('i') : null;
+
+            function applyTheme() {
+                if (!toggleIcon) return; 
+
+                const isDark = docHtml.classList.contains('dark');
+                toggleIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon'; 
+
+                setTimeout(() => {
+                    if (window.processMap && typeof window.processMap.drawConnections === 'function') {
+                        window.processMap.drawConnections();
+                    }
+                }, 100); 
+            }
+            
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    docHtml.classList.toggle('dark'); 
+                    localStorage.setItem('theme', docHtml.classList.contains('dark') ? 'dark' : 'light');
+                    applyTheme(); 
+                });
+            }
+
+            applyTheme(); // Apply theme on initial load
+            
+            // --- GSAP ANIMATIONS ---
+            gsap.registerPlugin(ScrollTrigger);
+            gsap.utils.toArray('[data-gsap-stagger]').forEach(container => {
+                const targets = container.querySelectorAll('.reveal-child');
+                if(targets.length > 0) { // Check if targets exist
+                    gsap.fromTo(targets, { opacity: 0, y: 50 }, {
+                        opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.2,
+                        scrollTrigger: { trigger: container, start: 'top 85%', toggleActions: 'play none none none' }
+                    });
+                }
+            });
+            gsap.utils.toArray('.reveal').forEach(elem => {
+                gsap.fromTo(elem, { opacity: 0, y: 50 }, {
+                    opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+                    scrollTrigger: { trigger: elem, start: 'top 90%', toggleActions: 'play none none none' }
+                });
+            });
+            
+            // --- SECTION NAVIGATION ---
+            const sections = gsap.utils.toArray('main section');
+            const navLinks = gsap.utils.toArray('.section-nav a');
+            sections.forEach(section => {
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: 'top center',
+                    end: 'bottom center',
+                    onToggle: self => {
+                        const navLink = document.querySelector(`.section-nav a[href="#${section.id}"]`);
+                        if (navLink) {
+                            if (self.isActive) {
+                                navLinks.forEach(link => link.classList.remove('active'));
+                                navLink.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // --- PROCESS MAP LOGIC ---
+            const processMapDemo = document.getElementById('process-map');
+            if (processMapDemo) {
+                const navItems = processMapDemo.querySelectorAll('.main-workflow-nav-item');
+                const detailsPanel = processMapDemo.querySelector('#workflow-details');
+                const svg = processMapDemo.querySelector('#connector-lines');
+                const mainContainer = processMapDemo.querySelector('.process-map-container');
+                const filterButtons = processMapDemo.querySelectorAll('.filter-btn');
+                const dataRecordItems = processMapDemo.querySelectorAll('.data-record-item');
+
+                let currentFilter = 'all';
+
+                // English workflow templates
+                const workflowTemplates = {
+                    plan: `
+                        <div class="space-y-4">
+                            <div class="sub-workflow-card glass-card p-4" data-teams="dev mfg" data-connects-to="record-meeting-minutes">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Market Research & Needs Analysis</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-dev text-sm font-semibold">Dev/Tech</span><span class="team-tag-mfg text-sm font-semibold">Mfg</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">Research and analyze market and potential customer needs. Based on internal and external information, plan and develop new product concepts to set the business direction.</p></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                             <div class="sub-workflow-card glass-card p-4" data-teams="mfg" data-connects-to="record-request-sheet record-sales-system">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Enter Opportunity Information</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-mfg text-sm font-semibold">Mfg</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">Obtain prospective information from customers and enter it into the designated opportunity management sheet. Providing detailed information at this stage facilitates later decisions, such as advance production.</p></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                             <div class="sub-workflow-card glass-card p-4" data-teams="mfg scm" data-connects-to="record-chat-tool">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Internal Approval & Handover</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-mfg text-sm font-semibold">Mfg</span><span class="team-tag-scm text-sm font-semibold">SCM</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">Create the opportunity management sheet and obtain approval from the responsible manager. Once approved, the status is automatically updated, and a confirmation request is sent to the next department via the chat tool.</p><div class="auto-notify"><i class="fas fa-robot"></i><span>Auto-notify on status change</span></div></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                        </div>`,
+                    dev: `
+                        <div class="space-y-4">
+                            <div class="sub-workflow-card glass-card p-4" data-teams="scm" data-connects-to="record-shipping-form">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Draft Shipping Request</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-scm text-sm font-semibold">SCM</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">The subsequent department drafts a shipping request based on the approved details. They check inventory availability, transportation methods, and regulations, then create a schedule based on the shipping date.</p></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                            <div class="sub-workflow-card glass-card p-4" data-teams="scm dev mfg" data-connects-to="record-mfg-order record-erp-system">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Multi-stage Approval & Production Plan</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-scm text-sm font-semibold">SCM</span><span class="team-tag-dev text-sm font-semibold">Dev/Tech</span><span class="team-tag-mfg text-sm font-semibold">Mfg</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">A multi-stage approval process by managers from relevant departments proceeds on the chat tool. Once all approvals are complete, the production planner issues a manufacturing work order and registers it in the core system.</p><div class="auto-notify"><i class="fas fa-robot"></i><span>Auto-notify upon approval</span></div></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                             <div class="sub-workflow-card glass-card p-4" data-teams="mfg scm" data-connects-to="record-mfg-order">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Production Start & Progress Mgmt</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-mfg text-sm font-semibold">Mfg</span><span class="team-tag-scm text-sm font-semibold">SCM</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">The manufacturing team starts production according to the plan. Progress is recorded on a dedicated management sheet, and upon completion, all related information in the opportunity sheet and core system is updated.</p></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                        </div>`,
+                    release: `
+                         <div class="space-y-4">
+                            <div class="sub-workflow-card glass-card p-4" data-teams="qa" data-connects-to="record-request-sheet">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Quality Inspection & Certificate Issuance</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-qa text-sm font-semibold">QC/QA</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">The quality control department inspects the manufactured products. A certificate of quality is issued upon customer request, and the inspection completion is recorded in the system. The completion status is automatically notified to stakeholders via the chat tool.</p><div class="auto-notify"><i class="fas fa-robot"></i><span>Auto-notify on inspection completion</span></div></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                            <div class="sub-workflow-card glass-card p-4" data-teams="scm mfg" data-connects-to="record-shipping-form">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Packaging & Shipping Arrangement</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-scm text-sm font-semibold">SCM</span><span class="team-tag-mfg text-sm font-semibold">Mfg</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">Products that pass inspection are packaged according to the instructions on the opportunity management sheet. The logistics department arranges transportation based on the shipping request and notifies stakeholders when shipping preparations are complete.</p></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                            <div class="sub-workflow-card glass-card p-4" data-teams="mfg scm" data-connects-to="record-sales-system record-erp-system">
+                                <div class="flex justify-between items-start gap-2"><h4 class="text-lg">Post-Shipment Processing & Invoicing</h4><div class="flex gap-1 flex-wrap justify-end shrink-0"><span class="team-tag-mfg text-sm font-semibold">Mfg</span><span class="team-tag-scm text-sm font-semibold">SCM</span></div></div>
+                                <div class="workflow-details-container"><p class="text-sm text-[var(--text-sub)] leading-relaxed">After pickup, the logistics department updates the status and syncs the information with related systems. Once delivery to the customer is confirmed, the sales representative issues an invoice at the appropriate time through the sales management system.</p><div class="auto-notify"><i class="fas fa-robot"></i><span>Auto-notify on shipment/delivery</span></div></div>
+                                <div class="expand-indicator flex items-center justify-end text-sm text-[var(--text-sub)] mt-2"><span>Details</span><svg class="icon w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></div>
+                            </div>
+                        </div>`
+                };
+
+                const drawConnections = () => {
+                    if (!svg || !mainContainer || !detailsPanel) return;
+                    svg.innerHTML = '';
+                    const connectingElements = detailsPanel.querySelectorAll('.sub-workflow-card:not(.filtered-out)[data-connects-to]');
+                    if (connectingElements.length === 0) return;
+
+                    const containerRect = mainContainer.getBoundingClientRect();
+
+                    connectingElements.forEach(sourceEl => {
+                        const targetIds = sourceEl.dataset.connectsTo.split(' ');
+                        targetIds.forEach(targetId => {
+                            const targetEl = document.getElementById(targetId.trim());
+
+                            if (targetEl && !targetEl.classList.contains('filtered-out')) {
+                                const sourceRect = sourceEl.getBoundingClientRect();
+                                const targetRect = targetEl.getBoundingClientRect();
+
+                                const x1 = sourceRect.right - containerRect.left;
+                                const y1 = sourceRect.top - containerRect.top + sourceRect.height / 2;
+                                const x2 = targetRect.left - containerRect.left;
+                                const y2 = targetRect.top - containerRect.top + targetRect.height / 2;
+                                
+                                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                                const d = `M ${x1} ${y1} C ${x1 + 60} ${y1}, ${x2 - 60} ${y2}, ${x2} ${y2}`;
+                                path.setAttribute('d', d);
+                                path.setAttribute('class', 'connector-line');
+                                svg.appendChild(path);
+                            }
+                        });
+                    });
+                };
+
+                const applyFilter = () => {
+                    const highlight = (items) => {
+                         items.forEach(item => {
+                            const itemTeams = item.dataset.teams ? item.dataset.teams.split(' ') : [];
+                            if (currentFilter === 'all' || itemTeams.includes(currentFilter)) {
+                                item.classList.remove('filtered-out');
+                            } else {
+                                item.classList.add('filtered-out');
+                            }
+                        });
+                    };
+                    
+                    highlight(navItems);
+                    highlight(detailsPanel.querySelectorAll('.sub-workflow-card'));
+                    highlight(dataRecordItems);
+                    
+                    requestAnimationFrame(drawConnections);
+                };
+
+                const displayWorkflow = (workflowId) => {
+                    const templateHTML = workflowTemplates[workflowId];
+                    if (templateHTML && detailsPanel) { // Check detailsPanel exists
+                        detailsPanel.innerHTML = templateHTML;
+                        
+                        const cards = detailsPanel.querySelectorAll('.sub-workflow-card');
+                        cards.forEach(card => {
+                            card.addEventListener('click', (e) => {
+                                if (e.target.closest('a')) { return; }
+                                
+                                const details = card.querySelector('.workflow-details-container');
+                                if (details) {
+                                    const wasOpen = details.classList.contains('open');
+                                    // Close all other open details first
+                                    detailsPanel.querySelectorAll('.workflow-details-container.open').forEach(d => {
+                                        if (d !== details) { // Don't close the one being clicked if it was already open
+                                            d.classList.remove('open');
+                                            const parentCard = d.closest('.sub-workflow-card');
+                                            if (parentCard) parentCard.classList.remove('expanded');
+                                        }
+                                    });
+
+                                    // Toggle the clicked one
+                                    card.classList.toggle('expanded', !wasOpen);
+                                    details.classList.toggle('open', !wasOpen);
+                                    
+                                    setTimeout(drawConnections, 500); // Redraw lines after animation
+                                }
+                            });
+                        });
+                        applyFilter(); // Apply filter to newly added elements
+                    } else if(detailsPanel) { // Only set placeholder if detailsPanel exists
+                        detailsPanel.innerHTML = `<div class="flex items-center justify-center h-full text-[var(--text-sub)]"><p>Please select a workflow stage on the left.</p></div>`; // English Placeholder
+                        if(svg) svg.innerHTML = ''; // Clear lines if no content
+                    }
+                };
+
+                navItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const workflowId = item.dataset.workflow;
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        item.classList.add('active');
+                        displayWorkflow(workflowId);
+                    });
+                });
+
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        currentFilter = button.dataset.team;
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        applyFilter();
+                    });
+                });
+
+                window.addEventListener('resize', () => setTimeout(drawConnections, 100));
+                 // Check if detailsPanel exists before adding listener
+                if (detailsPanel) {
+                    detailsPanel.addEventListener('scroll', drawConnections, { passive: true });
+                }
+                
+                // Initialize first workflow if nav items exist
+                if (navItems.length > 0) {
+                     navItems[0].click(); // Simulate click to load initial content and set active state
+                }
+
+                 const mapObserver = new IntersectionObserver((entries) => {
+                    if(entries[0].isIntersecting) {
+                        setTimeout(drawConnections, 500);
+                        mapObserver.unobserve(entries[0].target);
+                    }
+                }, { threshold: 0.1 });
+                 // Check if processMapDemo exists before observing
+                 if(processMapDemo) {
+                     mapObserver.observe(processMapDemo);
+                 }
+
+                window.processMap = { drawConnections }; // Expose drawConnections
+            } // End process map logic
+        });
+    </script>
+</body>
+</html>

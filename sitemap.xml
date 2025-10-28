@@ -1,80 +1,222 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 <urlset
       xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+      xmlns:xhtml="http://www.w3.org/1999/xhtml">
 <!-- created with Gemini -->
+<!--
+  このサイトマップは日本語(ja)と英語(en)のページを含み、
+  xhtml:link タグを使用して各言語のページを関連付けています。
+-->
 
+<!-- 1. Index Pages -->
 <url>
   <loc>https://kou511.github.io/portfolio/index.html</loc>
-  <lastmod>2025-10-28T18:40:00+00:00</lastmod>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/index.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/index_en.html"/>
+  <xhtml:link rel="alternate" hreflang="x-default" href="https://kou511.github.io/portfolio/index_en.html"/>
+  <lastmod>2025-10-28T18:30:00+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
   <loc>https://kou511.github.io/portfolio/index_en.html</loc>
-  <lastmod>2025-10-28T18:40:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-detail.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-automation.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-forecast-simulator.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-supplier-negotiation.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-image-analysis.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-supply-chain.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-generative-ai.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-ai-internal-guide.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-workflow-reform.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-data-analytics.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-rag.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://kou511.github.io/portfolio/project-ticket-contorol.html</loc>
-  <lastmod>2025-10-28T09:38:00+00:00</lastmod>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/index.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/index_en.html"/>
+  <xhtml:link rel="alternate" hreflang="x-default" href="https://kou511.github.io/portfolio/index_en.html"/>
+  <lastmod>2025-10-28T18:30:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 
+<!-- 2. Project: Core System Migration -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-detail.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-detail.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-detail_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-detail_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-detail.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-detail_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 3. Project: Reporting Automation -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-automation.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-automation.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-automation_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-automation_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-automation.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-automation_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 4. Project: Demand Forecast Simulator -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-forecast-simulator.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-forecast-simulator.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-forecast-simulator_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-forecast-simulator_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-forecast-simulator.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-forecast-simulator_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 5. Project: Overseas Supplier Negotiation -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-supplier-negotiation.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-supplier-negotiation.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-supplier-negotiation_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-supplier-negotiation_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-supplier-negotiation.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-supplier-negotiation_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 6. Project: In-house Image Analysis Tool -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-image-analysis.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-image-analysis.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-image-analysis_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-image-analysis_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-image-analysis.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-image-analysis_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 7. Project: Transport Optimization -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-supply-chain.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-supply-chain.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-supply-chain_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-supply-chain_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-supply-chain.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-supply-chain_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 8. Project: Radical Process Improvement -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-generative-ai.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-generative-ai.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-generative-ai_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-generative-ai_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-generative-ai.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-generative-ai_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 9. Project: AI Knowledge Site -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-ai-internal-guide.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-ai-internal-guide.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-ai-internal-guide_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-ai-internal-guide_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-ai-internal-guide.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-ai-internal-guide_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 10. Project: New Business Process Design -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-workflow-reform.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-workflow-reform.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-workflow-reform_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-workflow-reform_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-workflow-reform.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-workflow-reform_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 11. Project: Procurement Dashboard -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-data-analytics.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-data-analytics.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-data-analytics_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-data-analytics_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-data-analytics.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-data-analytics_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 12. Project: Internal Document Search App -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-rag.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-rag.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-rag_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-rag_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-rag.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-rag_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+<!-- 13. Project: Ticket Management Improvement -->
+<url>
+  <loc>https://kou511.github.io/portfolio/project-ticket-contorol.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-ticket-contorol.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-ticket-cotrol_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kou511.github.io/portfolio/project-ticket-cotrol_en.html</loc>
+  <xhtml:link rel="alternate" hreflang="ja" href="https://kou511.github.io/portfolio/project-ticket-contorol.html"/>
+  <xhtml:link rel="alternate" hreflang="en" href="https://kou511.github.io/portfolio/project-ticket-cotrol_en.html"/>
+  <lastmod>2025-10-28T09:50:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
 </urlset>
+
